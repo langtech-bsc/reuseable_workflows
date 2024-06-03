@@ -111,18 +111,20 @@ jobs:
               if [[ $SLURM_JOB_NODE == *"["* ]]; then
                   # Split by '['
                   IFS='[' read -r prefix range <<< "$SLURM_JOB_NODE"
-                  # Split the range part by '-'
-                  IFS='-' read -r start end <<< "$range"
+                  # Handle range (contains '-') or list (contains ',')
+                  if [[ $range == *"-"* ]]; then
+                      IFS='-' read -r start end <<< "$range"
+                  elif [[ $range == *","* ]]; then
+                      IFS=',' read -r start rest <<< "$range"
+                  else
+                      start=$range
+                  fi
                   # Remove ']' from the start variable
                   start=${start%]*}
                   # Join prefix with start
                   result="${prefix}${start}"
                   SLURM_JOB_NODE=$result
               fi
-
-              # node=$(echo "$SLURM_JOB_NODE" | grep -oE '\[[0-9]*' | grep -oE '[0-9]*')
-              # input_string=$(echo "$SLURM_JOB_NODE" | sed 's/\[[^]]*\]//g')
-              # echo "$input_string$node"
 
               ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "rm -rf ${SOCKET1} ${SOCKET2}; ssh -Nf -L ${SOCKET1}:localhost:${PORT1} -L ${SOCKET2}:localhost:${PORT2} ${SLURM_JOB_NODE} && chmod 660 ${SOCKET1} ${SOCKET2} "
               echo "${{ env.JOB_SSH_TUNNEL_COMMAND }}" > ${{ steps.mlflow.outputs.sync_dir }}/tunnel.log 
