@@ -6,7 +6,7 @@ on:
   
 jobs:
   launch-job:
-    runs-on: ubuntu-latest
+    runs-on: docker-apps
     env:
       REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
       REMOTE_USER: ${{ secrets.REMOTE_USER }}
