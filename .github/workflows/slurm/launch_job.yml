@@ -12,6 +12,7 @@ on:
   
 jobs:
   launch-job:
+    timeout-minutes: 43200
     runs-on: ${{ inputs.runs_on }}
     env:
       REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
