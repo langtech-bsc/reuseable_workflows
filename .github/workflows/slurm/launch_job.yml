@@ -3,10 +3,16 @@ name: Launch job
 
 on:
   workflow_call:
+    inputs:
+      runs_on:
+        required: true
+        type: string
+        default: ubuntu-latest
+    
   
 jobs:
   launch-job:
-    runs-on: docker-apps
+    runs-on: ${{ inputs.runs_on }}
     env:
       REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
       REMOTE_USER: ${{ secrets.REMOTE_USER }}
