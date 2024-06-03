@@ -11,7 +11,7 @@ on:
   
 jobs:
   docker2singularity:
-    runs-on: ${{ runs_on }}
+    runs-on: ${{ inputs.runs_on }}
     steps:
       - name: Set envs
         run: echo "JOB_SINGULARITY_IMAGE=$(echo ${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}.sif | awk '{print tolower($0)}')" >> $GITHUB_ENV
