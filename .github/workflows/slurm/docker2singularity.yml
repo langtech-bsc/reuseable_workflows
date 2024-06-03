@@ -11,6 +11,7 @@ on:
   
 jobs:
   docker2singularity:
+    timeout-minutes: 43200
     runs-on: ${{ inputs.runs_on }}
     steps:
       - name: Set envs
