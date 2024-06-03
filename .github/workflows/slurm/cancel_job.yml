@@ -7,6 +7,10 @@ on:
       job_id:
         required: true
         type: number
+      runs_on:
+        required: false
+        type: string
+        default: ubuntu-latest
 
 jobs:
   cancel_job:
