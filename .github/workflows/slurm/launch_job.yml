@@ -34,7 +34,7 @@ jobs:
           export SOCKET2=${JOB_PATH}/socket${PORT2}.sock
           echo "SOCKET1=$SOCKET1" >> $GITHUB_ENV
           echo "SOCKET2=$SOCKET2" >> $GITHUB_ENV
-          echo "JOB_SSH_TUNNEL_COMMAND=ssh -N -L ${{ env.PORT1 }}:${SOCKET1} -L ${{ env.PORT2 }}:${SOCKET2} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_USER }}" >> $GITHUB_ENV
+          echo "JOB_SSH_TUNNEL_COMMAND=ssh -N -L ${{ env.PORT1 }}:${SOCKET1} -L ${{ env.PORT2 }}:${SOCKET2} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" >> $GITHUB_ENV
 
       - name: Save job related env vars to file
         run: |
@@ -130,11 +130,11 @@ jobs:
       - name: Check on success
         if: steps.watch.outcome == 'success'
         run: | 
-          ml_flow stop --failed
+          ml_flow -t stop
           exit 0
 
       - name: Check on failures
         if: steps.watch.outcome != 'success'
         run: | 
-          ml_flow stop --failed
+          ml_flow -t stop --failed
           exit 1
