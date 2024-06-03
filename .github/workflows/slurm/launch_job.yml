@@ -108,6 +108,18 @@ jobs:
               cat $GITHUB_OUTPUT
 
               SLURM_JOB_NODE=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "squeue -j ${{ env.SLURM_JOB_ID }}  -o '%R'" | tail -1)
+              if [[ $SLURM_JOB_NODE == *"["* ]]; then
+                  # Split by '['
+                  IFS='[' read -r prefix range <<< "$SLURM_JOB_NODE"
+                  # Split the range part by '-'
+                  IFS='-' read -r start end <<< "$range"
+                  # Remove ']' from the start variable
+                  start=${start%]*}
+                  # Join prefix with start
+                  result="${prefix}${start}"
+                  SLURM_JOB_NODE=$result
+              fi
+
               # node=$(echo "$SLURM_JOB_NODE" | grep -oE '\[[0-9]*' | grep -oE '[0-9]*')
               # input_string=$(echo "$SLURM_JOB_NODE" | sed 's/\[[^]]*\]//g')
               # echo "$input_string$node"
