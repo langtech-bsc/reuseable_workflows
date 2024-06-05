@@ -7,7 +7,7 @@ on:
       runs_on:
         required: false
         type: string
-        default: ubuntu-latest
+        default: shell
   
 jobs:
   docker2singularity:
@@ -23,15 +23,6 @@ jobs:
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{secrets.SSH_PRIVATE_KEY}}
-    
-      #- name: Build and push
-      #  uses: docker/build-push-action@v5
-      #  with:
-      #    push: false
-      #    tags: user/app:latest
-
-      - name: Docker version
-        run: docker version
 
       - name: Build docker image
         run: docker build . --no-cache -t user/$JOB_SINGULARITY_IMAGE:latest
@@ -40,56 +31,6 @@ jobs:
         run: |
           docker save user/$JOB_SINGULARITY_IMAGE:latest -o singularity-$JOB_SINGULARITY_IMAGE.tar 
           docker image rm user/$JOB_SINGULARITY_IMAGE:latest
-
-      - name: Setup Go
-        #if: ${{ env.ACT }}
-        uses: actions/setup-go@v5
-        with:
-          go-version: 1.22.2
-          cache: false
-
-      - name: go version
-        #if: ${{ env.ACT }}
-        run: go version
-
-      - name: Install Dependencies
-        #if: ${{ env.ACT }}
-        shell: bash
-        run: |
-          sudo apt-get update
-          sudo DEBIAN_FRONTEND=noninteractive \
-          apt-get install -y \
-          autoconf \
-          automake \
-          git \
-          libfuse-dev \
-          libglib2.0-dev \
-          libseccomp-dev \
-          libtool \
-          pkg-config \
-          runc \
-          squashfs-tools \
-          squashfs-tools-ng \
-          uidmap \
-          wget \
-          zlib1g-dev 
-
-      - name: Install singularity
-        #if: ${{ env.ACT }}
-        shell: bash
-        env:
-          VERSION: "4.1.2"
-        run: |
-          wget https://github.com/sylabs/singularity/releases/download/v${VERSION}/singularity-ce-${VERSION}.tar.gz && \
-          tar -xzf singularity-ce-${VERSION}.tar.gz && \
-          cd singularity-ce-${VERSION}
-          
-          ./mconfig && \
-          make -C builddir && \
-          sudo make -C builddir install
-
-      - name: Singularity version
-        run: singularity version   
 
       - name: Singularity build
         run: |
