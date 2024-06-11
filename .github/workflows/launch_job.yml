@@ -153,7 +153,7 @@ jobs:
             then
               nohup ml_flow -t sync > ${{ steps.mlflow.outputs.sync_dir }}/mlflow.log 2>&1 < /dev/null &
               echo "mlflow_pid=$!" >> $GITHUB_OUTPUT
-              if [ '${{ inputs.enable_tunnel }}' = 'true']; then
+              if [ '${{ inputs.enable_tunnel }}' = 'true' ]; then
                 SLURM_JOB_NODE=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "squeue -j ${{ env.SLURM_JOB_ID }}  -o '%R'" | tail -1)
                 
                 if [[ $SLURM_JOB_NODE == *"["* ]]; then    
