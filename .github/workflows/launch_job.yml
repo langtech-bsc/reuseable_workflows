@@ -8,11 +8,37 @@ on:
         required: false
         type: string
         default: ubuntu-latest
+
       job_path:
         required: false
         type: string
         default: None
-  
+
+      singularity_image:
+          required: false
+          type: string
+          default: None
+
+      enable_jupyter:
+        required: false
+        type: boolean
+        default: false
+
+      enable_tunnel:
+        required: false
+        type: boolean
+        default: true
+
+      jupyter_port:
+        required: false
+        type: string
+        default: "8888"
+
+      extra_port:
+        required: false
+        type: string
+        default: "8080"
+
 jobs:
   launch-job:
     timeout-minutes: 43200
@@ -25,8 +51,6 @@ jobs:
       GPFS_JUPYTER_WORKING_DIR: ${{ vars.GPFS_JUPYTER_WORKING_DIR }}
       GPFS_MODELS_REGISTRY_PATH: ${{ vars.GPFS_MODELS_REGISTRY_PATH }}
       MLFLOW_TRACKING_SERVER_URL: ${{vars.MLFLOW_TRACKING_SERVER_URL}}
-      PORT1: "8080"
-      PORT2: "8888"
       
     steps:
       - uses: actions/checkout@v4
@@ -34,11 +58,20 @@ jobs:
       - name: Set ENV variables
         run: |
           JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
+          JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+
           echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> $GITHUB_ENV
-          echo "JOB_NAME=${JOB_REPO_NAME}-${{ github.run_id }}" >> $GITHUB_ENV
-          echo "JOB_SINGULARITY_IMAGE=$(echo ${JOB_REPO_NAME}.sif | awk '{print tolower($0)}')" >> $GITHUB_ENV
+          echo "JOB_NAME=${JOB_REPO_NAME}-${{ github.run_number }}" >> $GITHUB_ENV
+          echo "JOB_BRANCH=${JOB_BRANCH}" >> $GITHUB_ENV
+          
+          if [ -z "$singularity_image" ] || [ "$singularity_image" == "None" ]; then
+            echo "JOB_SINGULARITY_IMAGE=$(echo ${JOB_REPO_NAME}/${JOB_BRANCH}.sif | awk '{print tolower($0)}')" >> $GITHUB_ENV
+          else
+            echo "JOB_SINGULARITY_IMAGE=${{ inputs.singularity_image }}" >> $GITHUB_ENV
+          fi
+
           if [ -z "$job_path" ] || [ "$job_path" == "None" ]; then
-            echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}/${{ github.run_id }}" >> $GITHUB_ENV
+            echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}/${{ github.run_number }}" >> $GITHUB_ENV
           else
             echo "JOB_PATH=${{ inputs.job_path }}" >> $GITHUB_ENV
           fi
@@ -47,19 +80,21 @@ jobs:
         run: echo ${{ env.JOB_PATH }}
       
       - name: Set Socket variables
+        if: ${{ inputs.enable_tunnel }} == 'true'
         run: |
-          export SOCKET1=${JOB_PATH}/socket${PORT1}.sock
-          export SOCKET2=${JOB_PATH}/socket${PORT2}.sock
-          echo "SOCKET1=${SOCKET1}" >> $GITHUB_ENV
-          echo "SOCKET2=${SOCKET2}" >> $GITHUB_ENV
-          echo "JOB_SSH_TUNNEL_COMMAND=ssh -N -L ${{ env.PORT1 }}:${SOCKET1} -L ${{ env.PORT2 }}:${SOCKET2} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" >> $GITHUB_ENV
+          export EXTRA_SOCKET=${JOB_PATH}/socket${{ inputs.extra_port }}.sock
+          export JUPYTER_SOCKET=${JOB_PATH}/socket${{ inputs.jupyter_port }}.sock
+          echo "EXTRA_SOCKET=${EXTRA_SOCKET}" >> $GITHUB_ENV
+          echo "JUPYTER_SOCKET=${JUPYTER_SOCKET}" >> $GITHUB_ENV
+
+          echo "JOB_SSH_TUNNEL_COMMAND=ssh -N -L ${{ inputs.extra_port }}:${EXTRA_SOCKET} -L ${{ inputs.jupyter_port }}:${JUPYTER_SOCKET} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" >> $GITHUB_ENV
 
       - name: Save job related env vars to file
         run: |
           env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
       
       - name: Replace SBATCH Directives with env variables
-        run: | 
+        run: |
           sed -i "s|\%JOB_NAME%|${JOB_NAME}|" src/launch.sh
           sed -i "s|\%JOB_PATH%|${JOB_PATH}|" src/launch.sh
                     
@@ -91,12 +126,12 @@ jobs:
           remote_host: ${{ secrets.REMOTE_HOST }}
           remote_user: ${{ secrets.REMOTE_USER }}
           remote_source_path: ${{ env.JOB_PATH }}/logs
-          traking_url: 'https://jobs.mlflow.dev.aina.bsc.es'
+          traking_url: ${{ env.MLFLOW_TRACKING_SERVER_URL }}
           run_name: ${{ env.SLURM_JOB_ID }} 
           schedule: 'true'
       
       - name: Check Mlflow traking url
-        run: | 
+        run: |
           if [ -z "${{ steps.mlflow.outputs.artifact_url }}" ]; then
             echo "Mlflow API is not available, please contact MLOps team or try running the workflow again"
             echo "If you running the workflow locally with act, ensure you have BSC VPN conneted"
@@ -111,41 +146,38 @@ jobs:
          #Live status
          echo "Check the logs at: ${{ steps.mlflow.outputs.artifact_url }}"
          echo "Keep in mind that synchronization may take a little bit"
-         nohup $(while true; do
+         while true; do
             # hpc-rocket status rocket.yml --jobid ${{ env.SLURM_JOB_ID }} 
             running=$(hpc-rocket status rocket.yml --jobid ${{ env.SLURM_JOB_ID }}  | grep "RUNNING" | wc -l)
             if [[ $running > 0 ]]
             then
               nohup ml_flow -t sync > ${{ steps.mlflow.outputs.sync_dir }}/mlflow.log 2>&1 < /dev/null &
-              # export MLFLOW_PID=$!
               echo "mlflow_pid=$!" >> $GITHUB_OUTPUT
-              cat $GITHUB_OUTPUT
+              if [ '${{ inputs.enable_tunnel }}' = 'true']; then
+                SLURM_JOB_NODE=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "squeue -j ${{ env.SLURM_JOB_ID }}  -o '%R'" | tail -1)
+                
+                if [[ $SLURM_JOB_NODE == *"["* ]]; then    
+                    IFS='[' read -r prefix range <<< "$SLURM_JOB_NODE"  # Split by '['
+                    if [[ $range == *"-"* ]]; then                      # Handle range (contains '-')
+                        IFS='-' read -r start end <<< "$range"
+                    elif [[ $range == *","* ]]; then                    # Handle list (contains ',')
+                        IFS=',' read -r start rest <<< "$range"
+                    else
+                        start=$range
+                    fi
+                    
+                    start=${start%]*}                                   # Remove ']' from the start variable
+                    result="${prefix}${start}"                          # Join prefix with start
+                    SLURM_JOB_NODE=$result
+                fi
 
-              SLURM_JOB_NODE=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "squeue -j ${{ env.SLURM_JOB_ID }}  -o '%R'" | tail -1)
-              if [[ $SLURM_JOB_NODE == *"["* ]]; then
-                  # Split by '['
-                  IFS='[' read -r prefix range <<< "$SLURM_JOB_NODE"
-                  # Handle range (contains '-') or list (contains ',')
-                  if [[ $range == *"-"* ]]; then
-                      IFS='-' read -r start end <<< "$range"
-                  elif [[ $range == *","* ]]; then
-                      IFS=',' read -r start rest <<< "$range"
-                  else
-                      start=$range
-                  fi
-                  # Remove ']' from the start variable
-                  start=${start%]*}
-                  # Join prefix with start
-                  result="${prefix}${start}"
-                  SLURM_JOB_NODE=$result
+                ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "rm -rf ${{ env.EXTRA_SOCKET }} ${{ env.JUPYTER_SOCKET }}; ssh -Nf -L ${{ env.EXTRA_SOCKET }}:localhost:${{ inputs.extra_port }} -L ${{ env.JUPYTER_SOCKET }}:localhost:${{ inputs.jupyter_port }} 123abc "
+                echo "${{ env.JOB_SSH_TUNNEL_COMMAND }}" > ${{ steps.mlflow.outputs.sync_dir }}/tunnel.log
               fi
-
-              ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "rm -rf ${SOCKET1} ${SOCKET2}; ssh -Nf -L ${SOCKET1}:localhost:${PORT1} -L ${SOCKET2}:localhost:${PORT2} ${SLURM_JOB_NODE} && chmod 660 ${SOCKET1} ${SOCKET2} "
-              echo "${{ env.JOB_SSH_TUNNEL_COMMAND }}" > ${{ steps.mlflow.outputs.sync_dir }}/tunnel.log 
               break
             fi
             sleep 5
-          done)  > ./tmp 2>&1 < /dev/null &
+          done
 
           (while true; do
             hpc-rocket status rocket.yml --jobid ${{ env.SLURM_JOB_ID }} 

@@ -35,12 +35,12 @@ jobs:
       - name: Singularity build
         run: |
           singularity build --force $JOB_SINGULARITY_IMAGE docker-archive:singularity-$JOB_SINGULARITY_IMAGE.tar
-          sudo rm singularity-$JOB_SINGULARITY_IMAGE.tar
+          rm singularity-$JOB_SINGULARITY_IMAGE.tar
 
       - name: Push image
         run: |
           scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $JOB_SINGULARITY_IMAGE ${{secrets.REMOTE_USER}}@${{secrets.REMOTE_HOST}}:${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}
-          sudo rm $JOB_SINGULARITY_IMAGE
+          rm $JOB_SINGULARITY_IMAGE
         # ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.REMOTE_USER}}@${{secrets.REMOTE_HOST}} "cd ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }} && rm -rf $JOB_SINGULARITY_IMAGE"
         # tar czf - $JOB_SINGULARITY_IMAGE | ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.REMOTE_USER}}@${{secrets.REMOTE_HOST}} "cd ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }} && tar xzvf - $JOB_SINGULARITY_IMAGE"
 
