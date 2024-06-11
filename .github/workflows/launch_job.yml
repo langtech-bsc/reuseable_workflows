@@ -171,7 +171,7 @@ jobs:
                     SLURM_JOB_NODE=$result
                 fi
 
-                ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "rm -rf ${{ env.EXTRA_SOCKET }} ${{ env.JUPYTER_SOCKET }}; ssh -Nf -L ${{ env.EXTRA_SOCKET }}:localhost:${{ inputs.extra_port }} -L ${{ env.JUPYTER_SOCKET }}:localhost:${{ inputs.jupyter_port }} 123abc "
+                ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "rm -rf ${{ env.EXTRA_SOCKET }} ${{ env.JUPYTER_SOCKET }}; ssh -Nf -L ${{ env.EXTRA_SOCKET }}:localhost:${{ inputs.extra_port }} -L ${{ env.JUPYTER_SOCKET }}:localhost:${{ inputs.jupyter_port }} ${SLURM_JOB_NODE} && chmod 660 -f ${{ env.EXTRA_SOCKET }} ${{ env.JUPYTER_SOCKET }} 123abc "
                 echo "${{ env.JOB_SSH_TUNNEL_COMMAND }}" > ${{ steps.mlflow.outputs.sync_dir }}/tunnel.log
               fi
               break
