@@ -124,14 +124,15 @@ jobs:
           run_name: ${{ env.SLURM_JOB_ID }} 
           schedule: 'true'
       
-      - name: Check Mlflow traking url
+      - name: Monitoring and status (CHECK THE LOGS HERE)
         run: |
           if [ -z "${{ steps.mlflow.outputs.artifact_url }}" ]; then
             echo "Mlflow API is not available, please contact MLOps team or try running the workflow again"
-            echo "If you running the workflow locally with act, ensure you have BSC VPN conneted"
+            echo "If you are running the workflow locally with act, ensure you have BSC VPN connected"
             exit 1
           else
-            echo "${{ steps.mlflow.outputs.artifact_url }}"
+            echo "Check the logs at: ${{ steps.mlflow.outputs.artifact_url }}"
+            echo "Keep in mind that synchronization may take a little bit"
           fi
 
       - name: Watch job
