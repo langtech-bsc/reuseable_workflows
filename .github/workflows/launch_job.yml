@@ -1,5 +1,4 @@
 name: Launch job
-#run-name: ${{ github.actor }} is executing Launch job 🚀
 
 on:
   workflow_call:
@@ -19,15 +18,10 @@ on:
           type: string
           default: None
 
-      enable_jupyter:
-        required: false
-        type: boolean
-        default: false
-
       enable_tunnel:
         required: false
         type: boolean
-        default: true
+        default: false
 
       jupyter_port:
         required: false
