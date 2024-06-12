@@ -1,4 +1,4 @@
-name: Launch job
+name: Enhanced Launch job
 
 on:
   workflow_call:
@@ -9,6 +9,7 @@ on:
         default: ubuntu-latest
 
 jobs:
+
     launch-job:
         uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
         secrets: inherit
