@@ -1,0 +1,17 @@
+name: Launch job
+
+on:
+  workflow_call:
+    inputs:
+      runs_on:
+        required: false
+        type: string
+        default: ubuntu-latest
+
+jobs:
+    launch-job:
+        uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+        secrets: inherit
+        with: 
+            runs_on: ${{ inputs.runs_on }}
+            enable_tunnel: false
