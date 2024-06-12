@@ -11,6 +11,7 @@ on:
 jobs:
     launch-job:
         uses: langtech-bsc/magma/.github/workflows/launch_job.yml@1-initial-template
+        secrets: inherit
         with: 
             runs_on: ${{ inputs.runs_on }}
             enable_tunnel: false
