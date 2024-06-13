@@ -1,0 +1,52 @@
+name: Check hpc jobs
+
+inputs:
+  job_id:
+    required: false
+    type: string
+  job_name:
+    required: false
+    type: string
+
+outputs:
+  exists:
+    description: "Whether the job exists or not"
+    value: ${{ steps.set-outputs.outputs.exists }}
+  jobs:
+    description: "All running jobs id"
+    value: ${{ steps.set-outputs.outputs.jobs }}
+    
+runs:
+  using: "composite"
+  steps:
+    - name: Check inputs not empty
+      if: ${{ inputs.job_id == '' && inputs.job_name == '' }}
+      run: echo "Please provide job_id or job_name" && exit 1
+  
+    - name: Check job id and job name have value
+      if: ${{ inputs.job_id != '' && inputs.job_name != '' }}
+      run: echo "Please provide only one of the following input job_id or job_name" && exit 1
+  
+    - name: Check jobs by job id
+      if: ${{ inputs.job_id != '' }}
+      run: |
+        JOBS=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "squeue --job '${{ inputs.job_id }},1' -h -o '%i'")
+        echo "COUNT=$(echo $JOBS | wc -l)" >> $GITHUB_ENV
+        echo "JOBS=$JOBS" >> $GITHUB_ENV
+  
+    - name: Check jobs by job name
+      if: ${{ inputs.job_name != '' }}
+      run: |
+        JOBS=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "squeue --name ${{ inputs.job_name }} -h -o '%i'")
+        echo "COUNT=$(echo $JOBS | wc -l)" >> $GITHUB_ENV    
+        echo "JOBS=$(echo $JOBS | sed ':a;N;$!ba;s/\n/, /g')" >> $GITHUB_ENV
+        
+    - name: Set outputs
+      id: set-outputs
+      run: |
+        if [ "${{ env.COUNT }}" -eq 0 ]; then
+          echo "exists=false" >> $GITHUB_OUTPUT
+        else
+          echo "exists=true" >> $GITHUB_OUTPUT
+          echo "jobs=${{ env.JOBS }}" >> $GITHUB_OUTPUT
+        fi
