@@ -17,6 +17,7 @@ jobs:
           exists: ${{ steps.exists.outputs.exists }}
 
       steps:
+
       - name: Get job name
         id: job_variables
         run: |
@@ -24,9 +25,13 @@ jobs:
           JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
           echo "job_name=${JOB_REPO_NAME}-${JOB_BRANCH}" >> $GITHUB_OUTPUT
           echo "job_path=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}/${JOB_BRANCH}" >> $GITHUB_OUTPUT
+        
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - name: check if job exists
-        id: job_exists
+        id: check_job
         uses: langtech-bsc/magma/check-hpc-jobs@5-one-job-per-repobranch-limitation
         with:
           job_name: ${{ steps.job_variables.outputs.job_name}}
@@ -34,17 +39,17 @@ jobs:
           remote_host: ${{ secrets.REMOTE_HOST}}
 
       - name: Job already exists
-        if: ${{ steps.job_exists.exists}}
+        if: ${{ steps.check_job.outputs.exists == 'true'}}
         id: exists
         run: |
             echo "The job is already running. Please note the limitation of one job per repository/branch. To proceed, you can either create another branch, cancel the current job, or wait for the job to finish."
-            echo "JOB IDs: ${{steps.job_exists.outputs.jobs}}"
+            echo "JOB IDs: ${{steps.check_job.outputs.jobs}}"
             echo "exists=true" >> $GITHUB_OUTPUT
             exit 1
 
   launch-job:
       needs: pre-job
-      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@5-one-job-per-repobranch-limitation
       secrets: inherit
       with: 
         runs_on: ${{ inputs.runs_on }}

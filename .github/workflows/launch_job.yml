@@ -62,7 +62,6 @@ jobs:
           echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> $GITHUB_ENV
           echo "JOB_BRANCH=${JOB_BRANCH}" >> $GITHUB_ENV
           
-          
           if [ -z "${{ inputs.singularity_image }} ] || [ "${{ inputs.singularity_image }}" == "None" ]; then
             echo "JOB_SINGULARITY_IMAGE=$(echo ${JOB_REPO_NAME}/${JOB_BRANCH}.sif | awk '{print tolower($0)}')" >> $GITHUB_ENV
           else
