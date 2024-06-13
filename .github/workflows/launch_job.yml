@@ -85,7 +85,7 @@ jobs:
 
       - name: Save job related env vars to file
         run: |
-          env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
+          env | grep -e '^JOB_' -e '^GPFS_' | awk -F= 'length($2) > 0' > src/job.env
       
       - name: Replace SBATCH Directives with env variables
         run: |
