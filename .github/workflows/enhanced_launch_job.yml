@@ -6,13 +6,48 @@ on:
       runs_on:
         required: false
         type: string
-        default: ubuntu-latest
+        default: docker
 
 jobs:
+  pre-job:
+      runs-on: ${{inputs.runs_on}}
+      outputs:
+          job_name: ${{ steps.job_variables.outputs.job_name }}
+          job_path: ${{ steps.job_variables.outputs.job_path }}
+          exists: ${{ steps.exists.outputs.exists }}
 
-    launch-job:
-        uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
-        secrets: inherit
-        with: 
-            runs_on: ${{ inputs.runs_on }}
-            enable_tunnel: false
+      steps:
+      - name: Get job name
+        id: job_variables
+        run: |
+          JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
+          JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "job_name=${JOB_REPO_NAME}-${JOB_BRANCH}" >> $GITHUB_OUTPUT
+          echo "job_path=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}/${JOB_BRANCH}" >> $GITHUB_OUTPUT
+
+      - name: check if job exists
+        id: job_exists
+        uses: langtech-bsc/magma/check_hpc_jobs@5-one-job-per-repobranch-limitation
+        with:
+          job_name: ${{ steps.job_variables.job_name}}
+
+      - name: Job already exists
+        if: ${{ steps.job_exists.exists}}
+        id: exists
+        run: |
+            echo "The job is already running. Please note the limitation of one job per repository/branch. To proceed, you can either create another branch, cancel the current job, or wait for the job to finish."
+            echo "JOB IDs: ${{steps.job_exists.outputs.jobs}}"
+            echo "exists=true" >> $GITHUB_OUTPUT
+            exit 1
+
+  launch-job:
+      needs: pre-job
+      # if: ${{needs.pre-job.outputs.exists != 'true' }}
+      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+      secrets: inherit
+      with: 
+        runs_on: ${{ inputs.runs_on }}
+        job_path: ${{ needs.pre-job.outputs.job_path }}
+        job_name: ${{ needs.pre-job.outputs.job_name }}
+        enable_tunnel: false
+        
