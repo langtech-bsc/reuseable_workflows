@@ -27,9 +27,11 @@ jobs:
 
       - name: check if job exists
         id: job_exists
-        uses: langtech-bsc/magma/check_hpc_jobs@5-one-job-per-repobranch-limitation
+        uses: langtech-bsc/magma/check-hpc-jobs@5-one-job-per-repobranch-limitation
         with:
-          job_name: ${{ steps.job_variables.job_name}}
+          job_name: ${{ steps.job_variables.outputs.job_name}}
+          remote_user: ${{ secrets.REMOTE_USER}}
+          remote_host: ${{ secrets.REMOTE_HOST}}
 
       - name: Job already exists
         if: ${{ steps.job_exists.exists}}
@@ -42,7 +44,6 @@ jobs:
 
   launch-job:
       needs: pre-job
-      # if: ${{needs.pre-job.outputs.exists != 'true' }}
       uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
       secrets: inherit
       with: 

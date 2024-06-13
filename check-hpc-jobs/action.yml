@@ -2,11 +2,20 @@ name: Check hpc jobs
 
 inputs:
   job_id:
+    description: "Id of the job"
     required: false
-    type: string
+
   job_name:
+    description: "Name of the job"
     required: false
-    type: string
+
+  remote_user: 
+    description: "Remote user"
+    required: true
+
+  remote_host: 
+    description: "Remote host"
+    required: true
 
 outputs:
   exists:
@@ -30,14 +39,14 @@ runs:
     - name: Check jobs by job id
       if: ${{ inputs.job_id != '' }}
       run: |
-        JOBS=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "squeue --job '${{ inputs.job_id }},1' -h -o '%i'")
+        JOBS=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ inputs.remote_user }}@${{ inputs.remote_host }} "squeue --job '${{ inputs.job_id }},1' -h -o '%i'")
         echo "COUNT=$(echo $JOBS | wc -l)" >> $GITHUB_ENV
         echo "JOBS=$JOBS" >> $GITHUB_ENV
   
     - name: Check jobs by job name
       if: ${{ inputs.job_name != '' }}
       run: |
-        JOBS=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }} "squeue --name ${{ inputs.job_name }} -h -o '%i'")
+        JOBS=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ inputs.remote_user }}@${{ inputs.remote_host }} "squeue --name ${{ inputs.job_name }} -h -o '%i'")
         echo "COUNT=$(echo $JOBS | wc -l)" >> $GITHUB_ENV    
         echo "JOBS=$(echo $JOBS | sed ':a;N;$!ba;s/\n/, /g')" >> $GITHUB_ENV
         
