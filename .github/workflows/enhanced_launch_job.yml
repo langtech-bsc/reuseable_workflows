@@ -1,4 +1,4 @@
-name: Launch job
+name: Enhanced launch job
 
 on:
   workflow_call:
