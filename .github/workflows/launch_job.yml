@@ -43,13 +43,20 @@ jobs:
       REMOTE_GROUP: ${{ secrets.REMOTE_GROUP }}
       
     steps:
+      - uses: langtech-bsc/magma/check-vars-and-secrets@9-fix-saving-env-variables
+        with:
+          requiredSecrets: 'SECRET1,SECRET2,SECRET3'
+          requiredVars: 'VAR1,VAR2,VAR3'
+          secrets: ${{ toJson(secrets) }}
+          vars: ${{ toJson(vars) }}
+
       - uses: actions/checkout@v4
    
       - name: Set repository variables to env
         uses: oNaiPs/secrets-to-env-action@v1
         with:
           secrets: ${{ toJSON(vars) }}
-
+      
       - name: Set extra variables to env
         run: |
           JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}

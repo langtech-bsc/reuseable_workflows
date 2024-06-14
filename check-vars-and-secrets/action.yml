@@ -1,0 +1,15 @@
+name: "Check Env and Secrets"
+description: "GitHub Action to check for required secrets and environment variables"
+author: "Ankush Raj"
+
+inputs:
+  secrets:
+    description: "Required secrets"
+    required: false
+  vars:
+    description: "Required vars"
+    required: false
+
+runs:
+  using: "node16"
+  main: "dist/index.js"

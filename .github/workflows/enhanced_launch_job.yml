@@ -6,10 +6,10 @@ on:
       runs_on:
         required: false
         type: string
-        default: docker
+        default: ubuntu-latest
 jobs:
     launch-job:
-        uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+        uses: langtech-bsc/magma/.github/workflows/launch_job.yml@9-fix-saving-env-variables
         secrets: inherit
         with: 
             runs_on: ${{ inputs.runs_on }}
