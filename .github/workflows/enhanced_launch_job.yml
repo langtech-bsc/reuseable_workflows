@@ -32,7 +32,7 @@ jobs:
 
       - name: check if job exists
         id: check_job
-        uses: langtech-bsc/magma/check-hpc-jobs@5-one-job-per-repobranch-limitation
+        uses: langtech-bsc/magma/check-hpc-jobs@main
         with:
           job_name: ${{ steps.job_variables.outputs.job_name}}
           remote_user: ${{ secrets.REMOTE_USER}}
@@ -50,7 +50,7 @@ jobs:
 
   launch-job:
       needs: pre-job
-      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@5-one-job-per-repobranch-limitation
+      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
       secrets: inherit
       with: 
         runs_on: ${{ inputs.runs_on }}
