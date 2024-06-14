@@ -41,15 +41,16 @@ jobs:
       REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
       REMOTE_USER: ${{ secrets.REMOTE_USER }}
       REMOTE_GROUP: ${{ secrets.REMOTE_GROUP }}
-      GPFS_SINGULARITY_IMAGE_REGISTRY_PATH: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}
-      GPFS_JUPYTER_WORKING_DIR: ${{ vars.GPFS_JUPYTER_WORKING_DIR }}
-      GPFS_MODELS_REGISTRY_PATH: ${{ vars.GPFS_MODELS_REGISTRY_PATH }}
-      MLFLOW_TRACKING_SERVER_URL: ${{vars.MLFLOW_TRACKING_SERVER_URL}}
       
     steps:
       - uses: actions/checkout@v4
    
-      - name: Set ENV variables
+      - name: Set repository variables to env
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(vars) }}
+
+      - name: Set extra variables to env
         run: |
           JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
           JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
@@ -85,7 +86,7 @@ jobs:
 
       - name: Save job related env vars to file
         run: |
-          env | grep -e '^JOB_' -e '^GPFS_' | awk -F= 'length($2) > 0' > src/job.env
+          env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
       
       - name: Replace SBATCH Directives with env variables
         run: |
