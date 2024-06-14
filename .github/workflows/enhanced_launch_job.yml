@@ -7,6 +7,10 @@ on:
         required: false
         type: string
         default: docker
+      enable_tunnel:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   pre-job:
@@ -56,5 +60,5 @@ jobs:
         runs_on: ${{ inputs.runs_on }}
         job_path: ${{ needs.pre-job.outputs.job_path }}
         job_name: ${{ needs.pre-job.outputs.job_name }}
-        enable_tunnel: false
+        enable_tunnel: ${{ inputs.enable_tunnel }}
         
