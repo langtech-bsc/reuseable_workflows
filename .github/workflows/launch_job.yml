@@ -46,23 +46,29 @@ jobs:
       REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
       REMOTE_USER: ${{ secrets.REMOTE_USER }}
       REMOTE_GROUP: ${{ secrets.REMOTE_GROUP }}
-      GPFS_SINGULARITY_IMAGE_REGISTRY_PATH: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}
-      GPFS_JUPYTER_WORKING_DIR: ${{ vars.GPFS_JUPYTER_WORKING_DIR }}
-      GPFS_MODELS_REGISTRY_PATH: ${{ vars.GPFS_MODELS_REGISTRY_PATH }}
-      MLFLOW_TRACKING_SERVER_URL: ${{vars.MLFLOW_TRACKING_SERVER_URL}}
+      # GPFS_SINGULARITY_IMAGE_REGISTRY_PATH: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}
+      # GPFS_JUPYTER_WORKING_DIR: ${{ vars.GPFS_JUPYTER_WORKING_DIR }}
+      # GPFS_MODELS_REGISTRY_PATH: ${{ vars.GPFS_MODELS_REGISTRY_PATH }}
+      # MLFLOW_TRACKING_SERVER_URL: ${{vars.MLFLOW_TRACKING_SERVER_URL}}
       
     steps:
       - uses: actions/checkout@v4
+
+      - name: Set repository variables to env
+        uses: oNaiPs/secrets-to-env-action@v1
+        with:
+          secrets: ${{ toJSON(vars) }}
    
-      - name: Set ENV variables
+      - name: Set extra variables to env
         run: |
+          env
           JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
           JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
 
           echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> $GITHUB_ENV
           echo "JOB_BRANCH=${JOB_BRANCH}" >> $GITHUB_ENV
           
-          if [ -z "${{ inputs.singularity_image }} ] || [ "${{ inputs.singularity_image }}" == "None" ]; then
+          if [ -z "${{ inputs.singularity_image }}" ] || [ "${{ inputs.singularity_image }}" == "None" ]; then
             echo "JOB_SINGULARITY_IMAGE=$(echo ${JOB_REPO_NAME}/${JOB_BRANCH}.sif | awk '{print tolower($0)}')" >> $GITHUB_ENV
           else
             echo "JOB_SINGULARITY_IMAGE=${{ inputs.singularity_image }}" >> $GITHUB_ENV
