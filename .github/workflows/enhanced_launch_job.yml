@@ -17,8 +17,9 @@ jobs:
           exists: ${{ steps.exists.outputs.exists }}
 
       steps:
+      - uses: actions/checkout@v4
 
-      - name: Get job name
+      - name: Get job variables
         id: job_variables
         run: |
           JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
@@ -32,20 +33,20 @@ jobs:
 
       - name: check if job exists
         id: check_job
-        uses: langtech-bsc/magma/check-hpc-jobs@5-one-job-per-repobranch-limitation
+        uses: ./check-hpc-jobs
         with:
           job_name: ${{ steps.job_variables.outputs.job_name}}
           remote_user: ${{ secrets.REMOTE_USER}}
           remote_host: ${{ secrets.REMOTE_HOST}}
 
-      - name: Job already exists
-        if: ${{ steps.check_job.outputs.exists == 'true'}}
-        id: exists
-        run: |
-            echo "The job is already running. Please note the limitation of one job per repository/branch. To proceed, you can either create another branch, cancel the current job, or wait for the job to finish."
-            echo "JOB IDs: ${{steps.check_job.outputs.jobs}}"
-            echo "exists=true" >> $GITHUB_OUTPUT
-            exit 1
+      # - name: Job already exists
+      #   if: ${{ steps.check_job.outputs.exists == 'true'}}
+      #   id: exists
+      #   run: |
+      #       echo "The job is already running. Please note the limitation of one job per repository/branch. To proceed, you can either create another branch, cancel the current job, or wait for the job to finish."
+      #       echo "JOB IDs: ${{steps.check_job.outputs.jobs}}"
+      #       echo "exists=true" >> $GITHUB_OUTPUT
+      #       exit 1
 
   launch-job:
       needs: pre-job

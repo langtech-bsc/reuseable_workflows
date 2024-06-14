@@ -46,7 +46,6 @@ runs:
       if: ${{ inputs.job_name != '' }}
       run: |
         JOBS=$(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ inputs.remote_user }}@${{ inputs.remote_host }} "squeue --name ${{ inputs.job_name }} -h -o '%i' ")
-        echo $JOBS
         echo "JOBS=$JOBS >> $GITHUB_ENV
         
     - name: Set outputs
