@@ -87,7 +87,7 @@ jobs:
           echo "Job name: ${{ env.JOB_NAME }}"
       
       - name: Set Socket variables
-        if: ${{ inputs.enable_tunnel }} == 'true'
+        if: ${{ inputs.enable_tunnel == 'true'}}
         run: |
           export EXTRA_SOCKET=${JOB_PATH}/socket${{ inputs.extra_port }}.sock
           export JUPYTER_SOCKET=${JOB_PATH}/socket${{ inputs.jupyter_port }}.sock
