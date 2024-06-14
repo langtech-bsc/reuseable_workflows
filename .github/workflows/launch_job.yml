@@ -12,6 +12,11 @@ on:
         required: false
         type: string
         default: None
+      
+      job_name:
+        required: false
+        type: string
+        default: None
 
       singularity_image:
           required: false
@@ -48,30 +53,38 @@ jobs:
       
     steps:
       - uses: actions/checkout@v4
-   
-      - name: Set ENV variables
+
+      - name: Set extra variables to env
         run: |
+          env
           JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
           JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
 
           echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> $GITHUB_ENV
-          echo "JOB_NAME=${JOB_REPO_NAME}-${{ github.run_number }}" >> $GITHUB_ENV
           echo "JOB_BRANCH=${JOB_BRANCH}" >> $GITHUB_ENV
           
-          if [ -z "$singularity_image" ] || [ "$singularity_image" == "None" ]; then
+          if [ -z "${{ inputs.singularity_image }}" ] || [ "${{ inputs.singularity_image }}" == "None" ]; then
             echo "JOB_SINGULARITY_IMAGE=$(echo ${JOB_REPO_NAME}/${JOB_BRANCH}.sif | awk '{print tolower($0)}')" >> $GITHUB_ENV
           else
             echo "JOB_SINGULARITY_IMAGE=${{ inputs.singularity_image }}" >> $GITHUB_ENV
           fi
+          
+          if [ -z "${{ inputs.job_name }}" ] || [ "${{ inputs.job_name }}" == "None" ]; then 
+            echo "JOB_NAME=${JOB_REPO_NAME}-${{ github.run_number }}" >> $GITHUB_ENV
+          else
+            echo "JOB_NAME=${{ inputs.job_name }}" >> $GITHUB_ENV
+          fi
 
-          if [ -z "$job_path" ] || [ "$job_path" == "None" ]; then
+          if [ -z "${{ inputs.job_path }}" ] || [ "${{ inputs.job_path }}" == "None" ]; then
             echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}/${{ github.run_number }}" >> $GITHUB_ENV
           else
             echo "JOB_PATH=${{ inputs.job_path }}" >> $GITHUB_ENV
           fi
       
-      - name: Diractory where the job will be launched
-        run: echo ${{ env.JOB_PATH }}
+      - name: Job name and diractory where the job will be launched
+        run: |
+          echo "Directory: ${{ env.JOB_PATH }}"
+          echo "Job name: ${{ env.JOB_NAME }}"
       
       - name: Set Socket variables
         if: ${{ inputs.enable_tunnel }} == 'true'
