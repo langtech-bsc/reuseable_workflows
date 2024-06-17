@@ -78,7 +78,7 @@ jobs:
           if [ -z "${{ inputs.job_path }}" ] || [ "${{ inputs.job_path }}" == "None" ]; then
             echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}/${{ github.run_number }}" >> $GITHUB_ENV
           else
-            echo "JOB_PATH=${{ inputs.job_path }}" >> $GITHUB_ENV
+            echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${{ inputs.job_path }}" >> $GITHUB_ENV
           fi
       
       - name: Job name and diractory where the job will be launched
