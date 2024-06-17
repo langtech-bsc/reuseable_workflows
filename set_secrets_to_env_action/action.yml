@@ -1,0 +1,19 @@
+name: "Check Env and Secrets"
+description: "GitHub Action to check for required secrets and environment variables"
+author: "Ankush Raj"
+
+inputs:
+  json:
+    description: "Vars, secrets or any json with key values."
+    required: false
+  type:
+    description: "Whether they are of type variable, secret, or any other, including the default secret."
+    default: "secret"
+    required: false
+  must_include:
+    description: "These keys must exist with a value; otherwise, an error will be thrown (E.g, 'key1,key2,...')."
+    required: false
+
+runs:
+  using: "node16"
+  main: "dist/index.js"

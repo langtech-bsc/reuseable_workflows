@@ -42,25 +42,29 @@ jobs:
   launch-job:
     timeout-minutes: 43200
     runs-on: ${{ inputs.runs_on }}
-    env:
-      REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-      REMOTE_USER: ${{ secrets.REMOTE_USER }}
-      REMOTE_GROUP: ${{ secrets.REMOTE_GROUP }}
-      GPFS_SINGULARITY_IMAGE_REGISTRY_PATH: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}
-      GPFS_JUPYTER_WORKING_DIR: ${{ vars.GPFS_JUPYTER_WORKING_DIR }}
-      GPFS_MODELS_REGISTRY_PATH: ${{ vars.GPFS_MODELS_REGISTRY_PATH }}
-      MLFLOW_TRACKING_SERVER_URL: ${{vars.MLFLOW_TRACKING_SERVER_URL}}
-      
     steps:
-      - uses: actions/checkout@v4
+      - name: Check var boolean
+        run: echo "Var:${{inputs.enable_tunnel}}"
+        
+      - uses: langtech-bsc/magma/set_secrets_to_env_action@main
+        with:
+          must_include: 'REMOTE_HOST,REMOTE_USER,REMOTE_GROUP,SSH_PRIVATE_KEY'
+          json: ${{ toJson(secrets) }}
+          name: 'secret'
 
+      - uses: langtech-bsc/magma/set_secrets_to_env_action@main
+        with:
+          must_include: 'MLFLOW_TRACKING_SERVER_URL,GPFS_SINGULARITY_IMAGE_REGISTRY_PATH'
+          json: ${{ toJson(vars) }}
+          name: 'secret'
+
+      - uses: actions/checkout@v4
+   
       - name: Set extra variables to env
         run: |
           env
-          JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
           JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
 
-          echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> $GITHUB_ENV
           echo "JOB_BRANCH=${JOB_BRANCH}" >> $GITHUB_ENV
           
           if [ -z "${{ inputs.singularity_image }}" ] || [ "${{ inputs.singularity_image }}" == "None" ]; then
@@ -76,8 +80,11 @@ jobs:
           fi
 
           if [ -z "${{ inputs.job_path }}" ] || [ "${{ inputs.job_path }}" == "None" ]; then
-            echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}/${{ github.run_number }}" >> $GITHUB_ENV
+            JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}/${{ github.run_number }}
+            echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> $GITHUB_ENV
+            echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}" >> $GITHUB_ENV
           else
+            echo "JOB_REPO_NAME=${{ inputs.job_path }}" >> $GITHUB_ENV
             echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${{ inputs.job_path }}" >> $GITHUB_ENV
           fi
       
