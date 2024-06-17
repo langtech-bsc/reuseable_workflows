@@ -37,11 +37,6 @@ jobs:
   launch-job:
     timeout-minutes: 43200
     runs-on: ${{ inputs.runs_on }}
-    env:
-      REMOTE_HOST: ${{ secrets.REMOTE_HOST }}
-      REMOTE_USER: ${{ secrets.REMOTE_USER }}
-      REMOTE_GROUP: ${{ secrets.REMOTE_GROUP }}
-      
     steps:
       - name: Check var boolean
         run: echo "Var:${{inputs.enable_tunnel}}"
