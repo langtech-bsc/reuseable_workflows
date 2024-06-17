@@ -43,12 +43,20 @@ jobs:
       REMOTE_GROUP: ${{ secrets.REMOTE_GROUP }}
       
     steps:
+      - name: Check var boolean
+        run: echo "Var:${{inputs.enable_tunnel}}"
+        
       - uses: langtech-bsc/magma/check-vars-and-secrets@9-fix-saving-env-variables
         with:
-          requiredSecrets: 'SECRET1,SECRET2,SECRET3'
-          requiredVars: 'VAR1,VAR2,VAR3'
-          secrets: ${{ toJson(secrets) }}
-          vars: ${{ toJson(vars) }}
+          must_include: 'REMOTE_HOST,REMOTE_USER,REMOTE_GROUP,SSH_PRIVATE_KEY'
+          json: ${{ toJson(secrets) }}
+          name: 'secret'
+
+      - uses: langtech-bsc/magma/check-vars-and-secrets@9-fix-saving-env-variables
+        with:
+          must_include: 'MLFLOW_TRACKING_SERVER_URL,"OK"'
+          json: ${{ toJson(vars) }}
+          name: 'secret'
 
       - uses: actions/checkout@v4
    

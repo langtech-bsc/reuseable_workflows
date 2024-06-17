@@ -24948,37 +24948,39 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 async function run() {
     try {
-        const requiredSecrets = core.getInput('requiredSecrets');
-        const requiredVars = core.getInput('requiredVars');
-        const secretsJson = core.getInput("secrets");
-        const varsJson = core.getInput("vars");
-        console.log(secretsJson);
-        const secretsArray = requiredSecrets.split(",");
-        const varsArray = requiredVars.split(",");
-        let secretsError = false;
-        let varsError = false;
-        // Check for required secrets
-        for (const secret of secretsArray) {
-            const secretValue = core.getInput(secret);
-            if (!secretValue) {
-                core.error(`Required secret '${secret}' is not set.`);
-                secretsError = true;
-            }
+        const requiredSecrets = core.getInput('must_include');
+        const secretsJson = core.getInput("json", { required: true });
+        const type = core.getInput("type", { required: true });
+        let secrets;
+        try {
+            secrets = JSON.parse(secretsJson);
         }
-        // Check for required environment variables
-        for (const variable of varsArray) {
-            const variableValue = process.env[variable];
-            if (!variableValue) {
-                core.error(`Required environment variable '${variable}' is not set.`);
-                varsError = true;
+        catch (e) {
+            throw new Error(`Cannot parse JSON.
+      Make sure you add the following to this action:
+      with:
+          json: \${{ toJSON(secrets) }}
+                  or
+          json: \${{ toJSON(vars) }}
+        `);
+        }
+        let secretsError = false;
+        // Check for required secrets
+        for (const key of requiredSecrets.split(",")) {
+            const secretValue = secrets[key.trim()];
+            if (!secretValue) {
+                core.error(`Required ${type} '${key}' is not set.`);
+                secretsError = true;
             }
         }
         // Set outputs
         core.setOutput("secrets_error", secretsError.toString());
-        core.setOutput("vars_error", varsError.toString());
         // Exit with error if any errors were found
-        if (secretsError || varsError) {
-            core.setFailed("Required secrets or environment variables are missing.");
+        if (!secretsError) {
+            for (const key of Object.keys(secrets)) {
+                core.exportVariable(key, secrets[key]);
+                core.info(`Exported secret ${key}`);
+            }
         }
     }
     catch (error) {

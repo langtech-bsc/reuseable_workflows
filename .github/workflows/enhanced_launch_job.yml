@@ -11,6 +11,6 @@ jobs:
     launch-job:
         uses: langtech-bsc/magma/.github/workflows/launch_job.yml@9-fix-saving-env-variables
         secrets: inherit
-        with: 
+        with:
             runs_on: ${{ inputs.runs_on }}
             enable_tunnel: false
