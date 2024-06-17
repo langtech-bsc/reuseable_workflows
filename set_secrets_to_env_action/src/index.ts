@@ -34,7 +34,7 @@ export default async function run(): Promise<void> {
     // Set outputs
     core.setOutput("secrets_error", secretsError.toString());
     // Exit with error if any errors were found
-    if (!secretsError) {
+    if (secretsError) {
       core.setFailed("Required secrets or environment variables are missing.");
     }
     else{

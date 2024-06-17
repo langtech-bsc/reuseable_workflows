@@ -1,4 +1,4 @@
-name: Launch job
+name: Enhanced Launch job
 
 on:
   workflow_call:
@@ -6,11 +6,59 @@ on:
       runs_on:
         required: false
         type: string
-        default: ubuntu-latest
+        default: docker
+      enable_tunnel:
+        required: false
+        type: boolean
+        default: false
+
 jobs:
-    launch-job:
-        uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
-        secrets: inherit
+  pre-job:
+      runs-on: ${{inputs.runs_on}}
+      outputs:
+          job_name: ${{ steps.job_variables.outputs.job_name }}
+          job_path: ${{ steps.job_variables.outputs.job_path }}
+          exists: ${{ steps.exists.outputs.exists }}
+
+      steps:
+
+      - name: Get job variables
+        id: job_variables
+        run: |
+          JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
+          JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
+          echo "job_name=${JOB_REPO_NAME}-${JOB_BRANCH}" >> $GITHUB_OUTPUT
+          echo "job_path=${JOB_REPO_NAME}/${JOB_BRANCH}" >> $GITHUB_OUTPUT
+        
+      - uses: webfactory/ssh-agent@v0.9.0
         with:
-            runs_on: ${{ inputs.runs_on }}
-            enable_tunnel: false
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: check if job exists
+        id: check_job
+        uses: langtech-bsc/magma/check-hpc-jobs@main
+        with:
+          job_name: ${{ steps.job_variables.outputs.job_name}}
+          remote_user: ${{ secrets.REMOTE_USER}}
+          remote_host: ${{ secrets.REMOTE_HOST}}
+
+      - name: Job already exists
+        if: ${{ steps.check_job.outputs.exists == 'true'}}
+        id: exists
+        run: |
+            echo "The job is already running. Please note the limitation of one job per repository/branch. To proceed, you can either create another branch, cancel the current job, or wait for the job to finish."
+            echo "Exists: ${{steps.check_job.outputs.exists}}"
+            echo "JOB IDs: ${{steps.check_job.outputs.jobs}}"
+            echo "exists=true" >> $GITHUB_OUTPUT
+            exit 1
+
+  launch-job:
+      needs: pre-job
+      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+      secrets: inherit
+      with: 
+        runs_on: ${{ inputs.runs_on }}
+        job_path: ${{ needs.pre-job.outputs.job_path }}
+        job_name: ${{ needs.pre-job.outputs.job_name }}
+        enable_tunnel: ${{ inputs.enable_tunnel }}
+        
