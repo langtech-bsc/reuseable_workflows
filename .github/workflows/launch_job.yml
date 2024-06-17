@@ -46,25 +46,20 @@ jobs:
       - name: Check var boolean
         run: echo "Var:${{inputs.enable_tunnel}}"
         
-      - uses: langtech-bsc/magma/check-vars-and-secrets@9-fix-saving-env-variables
+      - uses: langtech-bsc/magma/set_secrets_to_env_action@main
         with:
           must_include: 'REMOTE_HOST,REMOTE_USER,REMOTE_GROUP,SSH_PRIVATE_KEY'
           json: ${{ toJson(secrets) }}
           name: 'secret'
 
-      - uses: langtech-bsc/magma/check-vars-and-secrets@9-fix-saving-env-variables
+      - uses: langtech-bsc/magma/set_secrets_to_env_action@main
         with:
-          must_include: 'MLFLOW_TRACKING_SERVER_URL,"OK"'
+          must_include: 'MLFLOW_TRACKING_SERVER_URL'
           json: ${{ toJson(vars) }}
           name: 'secret'
 
       - uses: actions/checkout@v4
    
-      - name: Set repository variables to env
-        uses: oNaiPs/secrets-to-env-action@v1
-        with:
-          secrets: ${{ toJSON(vars) }}
-      
       - name: Set extra variables to env
         run: |
           JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}

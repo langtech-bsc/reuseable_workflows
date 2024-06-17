@@ -9,7 +9,7 @@ on:
         default: ubuntu-latest
 jobs:
     launch-job:
-        uses: langtech-bsc/magma/.github/workflows/launch_job.yml@9-fix-saving-env-variables
+        uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
         secrets: inherit
         with:
             runs_on: ${{ inputs.runs_on }}

@@ -24977,6 +24977,9 @@ async function run() {
         core.setOutput("secrets_error", secretsError.toString());
         // Exit with error if any errors were found
         if (!secretsError) {
+            core.setFailed("Required secrets or environment variables are missing.");
+        }
+        else {
             for (const key of Object.keys(secrets)) {
                 core.exportVariable(key, secrets[key]);
                 core.info(`Exported secret ${key}`);
