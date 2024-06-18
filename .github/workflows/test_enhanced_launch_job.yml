@@ -1,5 +1,5 @@
 name: Test job enhanced launch job
-run-name: ${{ github.actor }} is executing Launch job 🚀
+run-name: ${{ github.actor }} is executing Test job enhanced launch job 🚀
 
 on:
   workflow_dispatch:
