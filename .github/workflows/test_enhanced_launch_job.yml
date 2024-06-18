@@ -1,4 +1,4 @@
-name: Launch job
+name: Test job enhanced launch job
 run-name: ${{ github.actor }} is executing Launch job 🚀
 
 on:
