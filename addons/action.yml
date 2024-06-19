@@ -108,6 +108,8 @@ runs:
       run: |
         echo "" >> ${{inputs.file}}
         echo "# --- IMPORTANT: DO NOT DELETE OR MODIFY THE FOLLOWING LINE ---" >> ${{inputs.file}}
+        echo "" >> ${{inputs.file}}
+        echo "echo Execute sleep" >> ${{inputs.file}}
         echo "sleep 30d" >> ${{inputs.file}}
         echo "" >> ${{inputs.file}}
         echo "# --- IMPORTANT: DO NOT DELETE OR MODIFY THE ABOVE LINE ---" >> ${{inputs.file}}

@@ -87,6 +87,8 @@ jobs:
             echo "JOB_REPO_NAME=${{ inputs.job_path }}" >> $GITHUB_ENV
             echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${{ inputs.job_path }}" >> $GITHUB_ENV
           fi
+
+          echo "JOB_LOGS_PATH=$JOB_PATH/logs" >> $GITHUB_ENV
       
       - name: Job name and diractory where the job will be launched
         run: |
@@ -112,6 +114,11 @@ jobs:
           sed -i "s|\%JOB_NAME%|${JOB_NAME}|" src/launch.sh
           sed -i "s|\%JOB_PATH%|${JOB_PATH}|" src/launch.sh
           
+      - uses: langtech-bsc/magma/addons@main
+        with:
+          file: "src/launch.sh"
+          jupyter: true
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

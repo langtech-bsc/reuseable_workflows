@@ -1,15 +1,15 @@
-name: Test addons
-run-name: ${{ github.actor }} is executing Test addons 🚀
+name: Test Action Addons
+run-name: ${{ github.actor }} is executing Test Action Addons 🚀
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-addons-action:
+  test-action-addons:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: langtech-bsc/magma/addons@16-file-injection
+      - uses: ./addons
         with:
             file: "src/launch.sh"
             jupyter: true
