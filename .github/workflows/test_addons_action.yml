@@ -5,10 +5,11 @@ on:
   workflow_dispatch:
 
 jobs:
-  test-addons:
+  test-addons-action:
     runs-on: ubuntu-latest
     steps:
-      - uses: langtech-bsc/magma/set_secrets_to_env_action@16-file-injection
+      - uses: actions/checkout@v4
+      - uses: langtech-bsc/magma/addons@16-file-injection
         with:
             file: "src/launch.sh"
             jupyter: true
