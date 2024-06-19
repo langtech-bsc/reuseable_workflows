@@ -1,0 +1,112 @@
+name: Check hpc jobs
+
+inputs:
+  file:
+    description: "File where the changes will be update"
+    required: true
+  
+  jupyter:
+    description: "Inject jupter"
+    required: false
+    default: false
+  
+  tgi:
+    description: "Inject tgi"
+    required: false
+    default: false
+
+  vlm:
+    description: "Inject tgi"
+    required: false
+    default: false
+
+  sleep: 
+    description: "Add sleep at the end of file"
+    required: false
+    default: true
+    
+runs:
+  using: "composite"
+  steps:
+    - name: Check file
+      shell: bash
+      run: |
+      if [ -f "${{inputs.file}}" ]; then
+        echo "# --- IMPORTANT: DO NOT DELETE OR MODIFY THE FOLLOWING LINE ---" > file.tmp
+      else 
+        echo "File '${{inputs.file}}' does not exist" && exit 1
+      fi
+
+    - name: Set requierd directives
+      shell: bash
+      run: |
+        cat ${{ github.action_path }}/directives.sh >> file.tmp
+        echo "Set directives done."
+
+    - name: Set jupiter
+      shell: bash
+      if: ${{ inputs.jupyter == true }}
+      run: |
+        cat ${{ github.action_path }}/jupyter.sh >> file.tmp
+        echo "" >> file.tmp
+        echo "Set jupiter done."
+
+    - name: Set tgi
+      shell: bash
+      if: ${{ inputs.tgi == true }}
+      run: |
+        cat ${{ github.action_path }}/tgi.sh >> file.tmp
+        echo "" >> file.tmp
+        echo "Set tgi done."
+
+    - name: Set vlm
+      shell: bash
+      if: ${{ inputs.vlm == true }}
+      run: |
+        cat ${{ github.action_path }}/vlm.sh >> file.tmp
+        echo "" >> file.tmp
+        echo "Set vlm done."
+
+
+    - name: Set end line
+      shell: bash
+      if: ${{ inputs.vlm == true }}
+      run: |
+        echo "# --- IMPORTANT: DO NOT DELETE OR MODIFY THE ABOVE LINE ---" >> file.tmp
+        echo "" >> file.tmp
+        echo "Set vlm done."
+
+    - name: Set last line
+      shell: bash
+        echo "# --- IMPORTANT: DO NOT DELETE OR MODIFY THE ABOVE LINE ---" >> file.tmp
+        echo "" >> file.tmp
+
+    - name: Update file
+      shell: bash
+      run: |
+        last_sbatch_line=$(grep -n '^#SBATCH' "${{inputs.file}}" | tail -1 | cut -d: -f1) # get last line number of #SBATCH
+        
+        # Split the original sbatch file into two parts
+        head -n "$last_sbatch_line" "${{inputs.file}}" > temp_head.sh
+        tail -n +$((last_sbatch_line + 1)) "${{inputs.file}}" > temp_tail.sh
+
+        cat temp_head.sh file.tmp temp_tail.sh > ${{inputs.file}}
+        echo "File updated"
+
+    - name: Set sleep line
+      if: ${{ inputs.sleep == true }}
+      shell: bash
+        echo "" >> ${{inputs.file}}
+        echo "# --- IMPORTANT: DO NOT DELETE OR MODIFY THE FOLLOWING LINE ---" >> ${{inputs.file}}
+        echo "sleep 30d" >> ${{inputs.file}}
+        echo "" >> ${{inputs.file}}
+        echo "# --- IMPORTANT: DO NOT DELETE OR MODIFY THE ABOVE LINE ---" >> ${{inputs.file}}
+
+    - name: Clean all
+      shell: bash
+        rm -rf temp_head.sh temp_tail.sh file.tmp
+
+
+
+    
+  

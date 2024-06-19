@@ -1,0 +1,22 @@
+name: Test addons
+run-name: ${{ github.actor }} is executing Test addons 🚀
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-addons:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: langtech-bsc/magma/set_secrets_to_env_action@16-file-injection
+        with:
+            file: "src/launch.sh"
+            jupyter: true
+
+      - run: cat src/launch.sh
+
+    
+
+
+
+      
