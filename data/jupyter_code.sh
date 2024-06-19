@@ -11,5 +11,3 @@ singularity exec --nv --no-home \
     $GPFS_SINGULARITY_IMAGE_REGISTRY_PATH/python-jupyter.sif jupyter-lab \
     --notebook-dir=/home/bsc/$USER \
     --no-browser --ip=0.0.0.0 --port=8888 > $JOB_PATH/logs/jupyter.log 2>&1 &
-
-        
