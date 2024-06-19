@@ -107,11 +107,31 @@ jobs:
         run: |
           env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
       
-      - name: Replace SBATCH Directives with env variables
+      - name: Pre launch modifications
         run: |
           sed -i "s|\%JOB_NAME%|${JOB_NAME}|" src/launch.sh
           sed -i "s|\%JOB_PATH%|${JOB_PATH}|" src/launch.sh
-                    
+          
+          wget https://raw.githubusercontent.com/langtech-bsc/magma/16-file-injection/data/jupyter_code.sh -O jupyter_code.sh
+          
+          sbatch_file=src/launch.sh
+          last_sbatch_line=$(grep -n '^#SBATCH' "$sbatch_file" | tail -1 | cut -d: -f1) # get last line number of #SBATCH
+          
+          # Split the original sbatch file into two parts
+          head -n "$last_sbatch_line" "$sbatch_file" > temp_head.sh
+          tail -n +$((last_sbatch_line + 1)) "$sbatch_file" > temp_tail.sh
+          
+          # Create file to tell start and end of eneject code
+          echo '# --- IMPORTANT: DO NOT DELETE OR MODIFY THE FOLLOWING LINE ---' > temp_start.sh
+          echo '# --- IMPORTANT: DO NOT DELETE OR MODIFY THE ABOVE LINE ---' > temp_end.sh
+          echo 'sleep 30d' > sleep.sh
+
+          cat temp_head.sh temp_start.sh jupyter_code.sh temp_end.sh temp_tail.sh > $sbatch_file
+          echo "" >> $sbatch_file
+          cat temp_start.sh sleep.sh temp_end.sh >> $sbatch_file
+
+          rm -rf temp_head.sh temp_tail.sh temp_start.sh temp_end.sh sleep.sh
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

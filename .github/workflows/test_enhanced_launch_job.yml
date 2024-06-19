@@ -8,5 +8,7 @@ jobs:
   test-job-enhanced-launch-job:
     uses: langtech-bsc/magma/.github/workflows/enhanced_launch_job.yml@main
     secrets: inherit
+    with:
+      runs_on: ubuntu-latest
 
       
