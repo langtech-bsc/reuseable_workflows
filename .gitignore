@@ -1,3 +1,4 @@
 **/.env
-**/my.secrets
+my.secrets
 .vscode
+
