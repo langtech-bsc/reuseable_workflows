@@ -36,7 +36,7 @@ jobs:
 
       - name: check if job exists
         id: check_job
-        uses: langtech-bsc/magma/check-hpc-jobs@main
+        uses: langtech-bsc/magma/check-hpc-jobs@16-file-injection
         with:
           job_name: ${{ steps.job_variables.outputs.job_name}}
           remote_user: ${{ secrets.REMOTE_USER}}
@@ -54,7 +54,7 @@ jobs:
 
   launch-job:
       needs: pre-job
-      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@16-file-injection
       secrets: inherit
       with: 
         runs_on: ${{ inputs.runs_on }}

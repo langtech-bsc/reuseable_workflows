@@ -6,7 +6,7 @@ on:
 
 jobs:
   test-action-addons:
-    runs-on: ubuntu-latest
+    runs-on: docker
     steps:
       - uses: actions/checkout@v4
       - uses: ./addons

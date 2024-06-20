@@ -4,8 +4,8 @@
   "description": "Check vars and secrets",
   "main": "dist/index.js",
   "scripts": {
-    "build": "npx ncc build src/index.ts -o dist --license licenses.txt",
-    "build-source-map": "npx ncc build src/index.ts -o dist --source-map --license licenses.txt"
+    "build": "ncc build src/index.ts -o dist --license licenses.txt",
+    "build-source-map": "ncc build src/index.ts -o dist --source-map --license licenses.txt"
   },
   "author": "Ankush Raj",
   "license": "Apache-2.0",
@@ -20,19 +20,18 @@
   "dependencies": {
     "@actions/core": "^1.10.1",
     "@actions/github": "^6.0.0",
-    "before-after-hook": "^2.2.3",
+    "before-after-hook": "^3.0.2",
     "deprecation": "^2.3.1",
-    "npx": "^10.2.2",
     "once": "^1.4.0",
     "tunnel": "^0.0.6",
-    "undici": "^5.28.4",
-    "undici-types": "^5.26.5",
-    "universal-user-agent": "^6.0.1",
-    "uuid": "^8.3.2",
+    "undici": "^6.19.2",
+    "undici-types": "^6.19.2",
+    "universal-user-agent": "^7.0.2",
+    "uuid": "^10.0.0",
     "wrappy": "^1.0.2"
   },
   "devDependencies": {
-    "@types/node": "^20.14.2",
+    "@types/node": "^20.14.6",
     "@vercel/ncc": "^0.38.1",
     "typescript": "^5.4.5"
   }
