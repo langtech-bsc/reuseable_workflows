@@ -43,5 +43,6 @@ jobs:
           value: projecteaina/actions-runner:${{ steps.vars.outputs.sha_short }}
           branch: update-chart-image/${{ steps.vars.outputs.sha_short }}
           targetBranch: main
+          masterBranchName: main
           createPR: true
           message: 'Update Actions Runner Docker Image to projecteaina/actions-runner:${{ steps.vars.outputs.sha_short }}'
