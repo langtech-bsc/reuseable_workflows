@@ -118,7 +118,7 @@ jobs:
       - uses: langtech-bsc/magma/addons@main
         with:
           file: "src/launch.sh"
-          jupyter: true
+          jupyter: false
 
       - name: Set up Python
         uses: actions/setup-python@v5
