@@ -8,7 +8,8 @@ import * as core from "@actions/core";
 export default async function run(): Promise<void> {
   try {
 
-    const requiredSecrets: string = core.getInput('must_include')
+    const requiredSecrets: string = core.getInput('must_exist')
+    const excludeSecrets: Array<string> = core.getInput('exclude').split(",")
     const secretsJson = core.getInput("json", { required: true });
     const type = core.getInput("type", { required: true });
 
@@ -44,8 +45,10 @@ export default async function run(): Promise<void> {
     }
     else{
       for (const key of Object.keys(secrets)) {
-        core.exportVariable(key, secrets[key])
-        core.info(`Exported secret ${key}`)
+        if (!excludeSecrets.includes(key)){
+          core.exportVariable(key, secrets[key])
+          core.info(`Exported secret ${key}`)
+        }
       }
     }
 

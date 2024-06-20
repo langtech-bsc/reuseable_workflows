@@ -24952,7 +24952,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 async function run() {
     try {
-        const requiredSecrets = core.getInput('must_include');
+        const requiredSecrets = core.getInput('must_exist');
+        const excludeSecrets = core.getInput('exclude').split(",");
         const secretsJson = core.getInput("json", { required: true });
         const type = core.getInput("type", { required: true });
         let secrets;
@@ -24985,8 +24986,10 @@ async function run() {
         }
         else {
             for (const key of Object.keys(secrets)) {
-                core.exportVariable(key, secrets[key]);
-                core.info(`Exported secret ${key}`);
+                if (!excludeSecrets.includes(key)) {
+                    core.exportVariable(key, secrets[key]);
+                    core.info(`Exported secret ${key}`);
+                }
             }
         }
     }

@@ -46,15 +46,16 @@ jobs:
       - name: Check var boolean
         run: echo "Var:${{inputs.enable_tunnel}}"
         
-      - uses: langtech-bsc/magma/set_secrets_to_env_action@16-file-injection
+      - uses: langtech-bsc/magma/set_secrets_to_env_action@main
         with:
-          must_include: 'REMOTE_HOST,REMOTE_USER,REMOTE_GROUP,SSH_PRIVATE_KEY'
+          must_exist: 'REMOTE_HOST,REMOTE_USER,REMOTE_GROUP,SSH_PRIVATE_KEY'
+          exclude: 'SSH_PRIVATE_KEY'
           json: ${{ toJson(secrets) }}
           name: 'secret'
 
-      - uses: langtech-bsc/magma/set_secrets_to_env_action@16-file-injection
+      - uses: langtech-bsc/magma/set_secrets_to_env_action@main
         with:
-          must_include: 'MLFLOW_TRACKING_SERVER_URL,GPFS_SINGULARITY_IMAGE_REGISTRY_PATH'
+          must_exist: 'MLFLOW_TRACKING_SERVER_URL,GPFS_SINGULARITY_IMAGE_REGISTRY_PATH'
           json: ${{ toJson(vars) }}
           name: 'secret'
 
@@ -114,7 +115,7 @@ jobs:
           sed -i "s|\%JOB_NAME%|${JOB_NAME}|" src/launch.sh
           sed -i "s|\%JOB_PATH%|${JOB_PATH}|" src/launch.sh
           
-      - uses: langtech-bsc/magma/addons@16-file-injection
+      - uses: langtech-bsc/magma/addons@main
         with:
           file: "src/launch.sh"
           jupyter: true
