@@ -1,3 +1,8 @@
+/**
+ * Welcome to index.ts
+ * @author Ankush Raj <https://www.bsc.es/rana-ankush>
+ */
+
 import * as core from "@actions/core";
 
 export default async function run(): Promise<void> {

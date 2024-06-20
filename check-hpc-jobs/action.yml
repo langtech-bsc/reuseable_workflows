@@ -1,4 +1,6 @@
 name: Check hpc jobs
+description: "GitHub Action verify whether a job is running or not"
+author: Ankush Raj <https://www.bsc.es/rana-ankush>
 
 inputs:
   job_id:
