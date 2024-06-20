@@ -9,12 +9,13 @@ on:
       - 'actions-runner-controller/runner/Dockerfile'
     tags-ignore:
       - "*"
-permissions:
-  security-events: write
-
 jobs:
   docker:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      repository-projects: write
     steps:
       -
         name: Checkout
