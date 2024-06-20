@@ -41,7 +41,7 @@ jobs:
           valueFile: 'actions-runner-controller/charts/runner-scale-set/values.yaml'
           propertyPath: 'template.spec.containers[0].image'
           value: projecteaina/actions-runner:${{ steps.vars.outputs.sha_short }}
-          branch: main
+          branch: update-chart-image/${{ steps.vars.outputs.sha_short }}
           targetBranch: main
           createPR: true
           message: 'Update Actions Runner Docker Image to projecteaina/actions-runner:${{ steps.vars.outputs.sha_short }}'
