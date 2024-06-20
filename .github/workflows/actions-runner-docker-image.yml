@@ -9,11 +9,12 @@ on:
       - 'actions-runner-controller/runner/Dockerfile'
     tags-ignore:
       - "*"
+permissions:
+  security-events: write
 
 jobs:
   docker:
     runs-on: ubuntu-latest
-    security-events: write
     steps:
       -
         name: Checkout
