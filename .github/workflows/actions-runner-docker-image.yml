@@ -21,7 +21,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      
       - 
         name: Set short sha
         id: vars
@@ -33,3 +32,14 @@ jobs:
           context: actions-runner-controller/runner/
           push: true
           tags: projecteaina/actions-runner:latest, projecteaina/actions-runner:${{ steps.vars.outputs.sha_short }}
+      -
+        name: Update Image Version in the related HelmChart values.yaml
+        uses: OpsVerseIO/image-updater-action@0.1.0
+        with:
+          valueFile: 'actions-runner-controller/charts/arc-configuration/values.yaml'
+          propertyPath: 'spec.containers[0].image'
+          value: projecteaina/actions-runner:${{ steps.vars.outputs.sha_short }}
+          branch: main
+          targetBranch: main
+          createPR: true
+          message: 'Update Actions Runner Docker Image to projecteaina/actions-runner:${{ steps.vars.outputs.sha_short }}'
