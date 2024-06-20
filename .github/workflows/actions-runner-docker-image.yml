@@ -7,6 +7,8 @@ on:
       - 'main'
     paths:
       - 'actions-runner-controller/runner/Dockerfile'
+    tags-ignore:
+      - "*"
 
 jobs:
   docker:
@@ -37,7 +39,7 @@ jobs:
         uses: OpsVerseIO/image-updater-action@0.1.0
         with:
           valueFile: 'actions-runner-controller/charts/runner-scale-set/values.yaml'
-          propertyPath: 'spec.containers[0].image'
+          propertyPath: 'template.spec.containers[0].image'
           value: projecteaina/actions-runner:${{ steps.vars.outputs.sha_short }}
           branch: main
           targetBranch: main
