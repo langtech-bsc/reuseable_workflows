@@ -25,7 +25,7 @@ inputs:
   sleep: 
     description: "Add sleep at the end of file"
     required: false
-    default: true
+    default: false
     
 runs:
   using: "composite"
