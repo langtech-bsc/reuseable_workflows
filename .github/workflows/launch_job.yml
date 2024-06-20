@@ -48,13 +48,14 @@ jobs:
         
       - uses: langtech-bsc/magma/set_secrets_to_env_action@main
         with:
-          must_include: 'REMOTE_HOST,REMOTE_USER,REMOTE_GROUP,SSH_PRIVATE_KEY'
+          must_exist: 'REMOTE_HOST,REMOTE_USER,REMOTE_GROUP,SSH_PRIVATE_KEY'
+          exclude: 'SSH_PRIVATE_KEY'
           json: ${{ toJson(secrets) }}
           name: 'secret'
 
       - uses: langtech-bsc/magma/set_secrets_to_env_action@main
         with:
-          must_include: 'MLFLOW_TRACKING_SERVER_URL,GPFS_SINGULARITY_IMAGE_REGISTRY_PATH'
+          must_exist: 'MLFLOW_TRACKING_SERVER_URL,GPFS_SINGULARITY_IMAGE_REGISTRY_PATH'
           json: ${{ toJson(vars) }}
           name: 'secret'
 
@@ -87,6 +88,8 @@ jobs:
             echo "JOB_REPO_NAME=${{ inputs.job_path }}" >> $GITHUB_ENV
             echo "JOB_PATH=/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${{ inputs.job_path }}" >> $GITHUB_ENV
           fi
+
+          echo "JOB_LOGS_PATH=$JOB_PATH/logs" >> $GITHUB_ENV
       
       - name: Job name and diractory where the job will be launched
         run: |
@@ -107,11 +110,16 @@ jobs:
         run: |
           env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
       
-      - name: Replace SBATCH Directives with env variables
+      - name: Pre launch modifications
         run: |
           sed -i "s|\%JOB_NAME%|${JOB_NAME}|" src/launch.sh
           sed -i "s|\%JOB_PATH%|${JOB_PATH}|" src/launch.sh
-                    
+          
+      - uses: langtech-bsc/magma/addons@main
+        with:
+          file: "src/launch.sh"
+          jupyter: true
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:

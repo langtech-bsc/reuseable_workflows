@@ -47,7 +47,7 @@ jobs:
         id: exists
         run: |
             echo "The job is already running. Please note the limitation of one job per repository/branch. To proceed, you can either create another branch, cancel the current job, or wait for the job to finish."
-            echo "Exists: ${{steps.check_job.outputs.exists}}"
+            echo "Job already exists"
             echo "JOB IDs: ${{steps.check_job.outputs.jobs}}"
             echo "exists=true" >> $GITHUB_OUTPUT
             exit 1
