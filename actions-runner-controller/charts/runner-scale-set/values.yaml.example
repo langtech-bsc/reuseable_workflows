@@ -46,7 +46,7 @@ minRunners: 1
 runnerGroup: "default"
 
 ## name of the runner scale set to create.  Defaults to the helm release name
-runnerScaleSetName: "magma-arc"
+runnerScaleSetName: "magma-runner-set"
 
 ## A self-signed CA certificate for communication with the GitHub server can be
 ## provided using a config map key selector. If `runnerMountPath` is set, for
@@ -76,17 +76,17 @@ runnerScaleSetName: "magma-arc"
 ## If any customization is required for dind or kubernetes mode, containerMode should remain
 ## empty, and configuration should be applied to the template.
 containerMode:
-    type: "dind"  ## type can be set to dind or kubernetes
+    type: "kubernetes"  ## type can be set to dind or kubernetes
 #   ## the following is required when containerMode.type=kubernetes
-#   kubernetesModeWorkVolumeClaim:
-#     accessModes: ["ReadWriteOnce"]
-#     # For local testing, use https://github.com/openebs/dynamic-localpv-provisioner/blob/develop/docs/quickstart.md to provide dynamic provision volume with storageClassName: openebs-hostpath
-#     storageClassName: "dynamic-blob-storage"
-#     resources:
-#       requests:
-#         storage: 1Gi
-#   kubernetesModeServiceAccount:
-#     annotations:
+    kubernetesModeWorkVolumeClaim:
+      accessModes: ["ReadWriteOnce"]
+      # For local testing, use https://github.com/openebs/dynamic-localpv-provisioner/blob/develop/docs/quickstart.md to provide dynamic provision volume with storageClassName: openebs-hostpath
+      storageClassName: "microk8s-hostpath"
+      resources:
+        requests:
+          storage: 5Gi
+    kubernetesModeServiceAccount:
+      annotations:
 
 ## listenerTemplate is the PodSpec for each listener Pod
 ## For reference: https://kubernetes.io/docs/reference/kubernetes-api/workload-resources/pod-v1/#PodSpec
@@ -189,8 +189,11 @@ template:
   spec:
     containers:
       - name: runner
-        image: projecteaina/actions-runner:latest
+        image: projecteaina/actions-runner:b084f07
         command: ["/home/runner/run.sh"]
+        env:
+        - name: ACTIONS_RUNNER_REQUIRE_JOB_CONTAINER
+          value: "false"
 
 ## Optional controller service account that needs to have required Role and RoleBinding
 ## to operate this gha-runner-scale-set installation.
