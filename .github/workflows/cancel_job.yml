@@ -43,5 +43,7 @@ jobs:
 
       - name: Cancel job
         run: |
-          output=$(hpc-rocket cancel rocket.yml --jobid ${{ inputs.job_id}})
-          echo $output
+          #Canceling job...
+          tempfile=$(mktemp)
+          hpc-rocket cancel rocket.yml --jobid ${{ inputs.job_id}} 2>&1 | tee "$tempfile"
+          output=$(cat "$tempfile")
