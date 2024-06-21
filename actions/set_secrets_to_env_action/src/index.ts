@@ -11,7 +11,7 @@ export default async function run(): Promise<void> {
     const requiredSecrets: string = core.getInput('must_exist')
     const excludeSecrets: Array<string> = core.getInput('exclude').split(",")
     const secretsJson = core.getInput("json", { required: true });
-    const type = core.getInput("type", { required: true });
+    const name = core.getInput("name", { required: true });
 
     let secrets: Record<string, string>
     try {
@@ -32,7 +32,7 @@ export default async function run(): Promise<void> {
     for (const key of requiredSecrets.split(",")) {
       const secretValue = secrets[key.trim()];
       if (!secretValue) {
-        core.error(`Required ${type} '${key}' is not set.`);
+        core.error(`Required ${name} '${key}' is not set.`);
         secretsError = true;
       }
     }

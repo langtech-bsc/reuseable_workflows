@@ -24955,7 +24955,7 @@ async function run() {
         const requiredSecrets = core.getInput('must_exist');
         const excludeSecrets = core.getInput('exclude').split(",");
         const secretsJson = core.getInput("json", { required: true });
-        const type = core.getInput("type", { required: true });
+        const name = core.getInput("name", { required: true });
         let secrets;
         try {
             secrets = JSON.parse(secretsJson);
@@ -24974,7 +24974,7 @@ async function run() {
         for (const key of requiredSecrets.split(",")) {
             const secretValue = secrets[key.trim()];
             if (!secretValue) {
-                core.error(`Required ${type} '${key}' is not set.`);
+                core.error(`Required ${name} '${key}' is not set.`);
                 secretsError = true;
             }
         }
