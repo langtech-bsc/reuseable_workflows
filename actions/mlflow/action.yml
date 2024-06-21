@@ -1,0 +1,75 @@
+name: 'Sync cluster to mlflow'
+
+inputs:
+  remote_host:
+    description: 'Remote Host'
+    required: true
+  remote_user:
+    description: 'Remote User'
+    required: true
+  experiment_name:
+    description: 'Name for experiment'
+    required: true
+  run_name:
+    description: "Name for run"
+    required: true
+  remote_source_path:
+    description: "Remote path to synchronize"
+    required: true
+  traking_url:
+    description: "Mlflow tracking url"
+    required: true
+  schedule:
+    description: "whether to schedule or not ['true', 'false'], by deafult 'false'"
+    default: 'false'
+
+outputs:
+  sync_dir:
+    description: "Directory where all the synchronization is done"
+    value: ${{ steps.env.outputs.sync_dir }}
+  artifact_url:
+    description: "If input variable schedule is true, it return artifact url"
+    value: ${{ steps.schedule.outputs.artifact_url }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Install mlflow requirements
+      shell: bash
+      run : pip install mlflow sysrsync python-dotenv
+
+    - uses: GuillaumeFalourd/setup-rsync@v1.2
+    
+    - name: Save envs
+      id: env
+      shell: bash
+      run: |
+        echo "TRAKING_URL=${{ inputs.traking_url }}" > .env_mlflow
+        echo "EXPERIMENT=${{ inputs.experiment_name }}" >> .env_mlflow
+        echo "RUN_NAME=${{ inputs.run_name }}" >> .env_mlflow
+        echo "REMOTE_HOST=${{ inputs.remote_host }}" >> .env_mlflow
+        echo "REMOTE_USER=${{ inputs.remote_user }}" >> .env_mlflow
+        echo "REMOTE_SOURCE_PATH=${{ inputs.remote_source_path }}" >> .env_mlflow
+        echo "DESTINATION=mlflow_dir" >> .env_mlflow
+
+        echo "sync_dir=mlflow_dir" >> $GITHUB_OUTPUT
+
+    - name: Setup mlflow script
+      shell: bash
+      run: |
+        cat ${{ github.action_path }}/ml_flow.py | tee ml_flow.py > /dev/null
+        chmod +x ml_flow.py
+        rm -f /usr/bin/ml_flow
+        sudo ln -s $(pwd)/ml_flow.py /usr/bin/ml_flow
+
+    - name: Create destination directory
+      shell: bash
+      run: mkdir -p ${{steps.env.outputs.sync_dir}}
+
+    - name: Schedule
+      id: schedule
+      shell: bash
+      if: ${{ inputs.schedule == 'true' }} 
+      run: |
+        ml_flow -t schedule
+        echo "artifact_url=$(ml_flow -t artifact_url)" >> $GITHUB_OUTPUT
