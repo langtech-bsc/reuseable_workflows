@@ -6,7 +6,7 @@ on:
       runs_on:
         required: false
         type: string
-        default: docker
+        default: magma-runner-set
 
       job_path:
         required: false

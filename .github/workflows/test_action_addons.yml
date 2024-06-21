@@ -6,7 +6,7 @@ on:
 
 jobs:
   test-action-addons:
-    runs-on: docker
+    runs-on: magma-runner-set
     steps:
       - uses: actions/checkout@v4
       - uses: ./addons
