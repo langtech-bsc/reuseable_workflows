@@ -1,5 +1,5 @@
 name: Cancel job
-run-name: ${{ github.actor }} is executing Cancel job 🚀
+# run-name: ${{ github.actor }} is executing Cancel job 🚀
 
 on:
   workflow_call:
