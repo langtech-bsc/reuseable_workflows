@@ -6,7 +6,7 @@ on:
       runs_on:
         required: false
         type: string
-        default: docker
+        default: magma-runner-set
       enable_tunnel:
         required: false
         type: boolean
