@@ -46,14 +46,14 @@ jobs:
       - name: Check var boolean
         run: echo "Var:${{inputs.enable_tunnel}}"
         
-      - uses: langtech-bsc/magma/set_secrets_to_env_action@main
+      - uses: langtech-bsc/magma/actions/set_secrets_to_env_action@main
         with:
           must_exist: 'REMOTE_HOST,REMOTE_USER,REMOTE_GROUP,SSH_PRIVATE_KEY'
           exclude: 'SSH_PRIVATE_KEY'
           json: ${{ toJson(secrets) }}
           name: 'secret'
 
-      - uses: langtech-bsc/magma/set_secrets_to_env_action@main
+      - uses: langtech-bsc/magma/actions/set_secrets_to_env_action@main
         with:
           must_exist: 'MLFLOW_TRACKING_SERVER_URL,GPFS_SINGULARITY_IMAGE_REGISTRY_PATH'
           json: ${{ toJson(vars) }}
@@ -111,7 +111,7 @@ jobs:
         run: |
           env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
       
-      - uses: langtech-bsc/magma/addons@main
+      - uses: langtech-bsc/magma/actions/addons@main
         with:
           file: "src/launch.sh"
           jupyter: false
@@ -119,7 +119,7 @@ jobs:
       - name: Pre launch modifications
         run: |
           sed -i "s|\%JOB_NAME%|${{ env.JOB_NAME }}|" src/launch.sh
-          sed -i "s|\%JOB_PATH%|${{  env.JOB_PATH  }}|" src/launch.sh
+          sed -i "s|\%JOB_PATH%|${{ env.JOB_PATH  }}|" src/launch.sh
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -146,7 +146,7 @@ jobs:
       
       - name: Setup mlflow
         id: mlflow
-        uses: langtech-bsc/action_rsync_mlflow@main
+        uses: langtech-bsc/magma/actions/mlflow@main
         with:
           experiment_name: ${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
           remote_host: ${{ secrets.REMOTE_HOST }}
