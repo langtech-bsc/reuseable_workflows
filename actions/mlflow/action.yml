@@ -34,11 +34,11 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Install mlflow requirements
-      shell: bash
-      run : pip install mlflow sysrsync python-dotenv
+    # - name: Install mlflow requirements
+    #   shell: bash
+    #   run : pip install mlflow sysrsync python-dotenv
 
-    - uses: GuillaumeFalourd/setup-rsync@v1.2
+    # - uses: GuillaumeFalourd/setup-rsync@v1.2
     
     - name: Save envs
       id: env

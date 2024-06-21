@@ -121,20 +121,21 @@ jobs:
           sed -i "s|\%JOB_NAME%|${{ env.JOB_NAME }}|" src/launch.sh
           sed -i "s|\%JOB_PATH%|${{ env.JOB_PATH  }}|" src/launch.sh
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-          architecture: 'x64'
+      # - name: Set up Python
+      #   uses: actions/setup-python@v5
+      #   with:
+      #     python-version: '3.12'
+      #     architecture: 'x64'
+
       - uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+      # - name: Display Python version
+      #   run: python -c "import sys; print(sys.version)"
 
-      - name: Install hpc rocket from source
-        run: pip install hpc-rocket
+      # - name: Install hpc rocket from source
+      #   run: pip install hpc-rocket
 
       - name: Launch job
         run: |
