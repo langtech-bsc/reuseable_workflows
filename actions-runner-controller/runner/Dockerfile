@@ -4,6 +4,8 @@ USER root
 
 RUN apt-get update && apt-get install -y \
    openssh-client \
+   rsync \
+   python-is-python3 \
    python3-pip \
    && rm -rf /var/lib/apt/lists/
 
