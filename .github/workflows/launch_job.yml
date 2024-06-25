@@ -64,13 +64,13 @@ jobs:
       PORT2: "8080"
       JOB_PATH: ${{ inputs.job_path }}
       JOB_NAME: ${{ inputs.job_name }}
-      JOB_SINGULARITY: ${{ inputs.singularity }}
+      GPFS_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.singularity }}
       JOB_ENABLE_TUNNEL: ${{ inputs.enable_tunnel }}
       JOB_JUPTER_ENABLE: ${{ inputs.jupyter_enable }}
-      JOB_JUPITER_SINGULARITY: ${{ inputs.jupyter_singularity }}
+      GPFS_JUPITER_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.jupyter_singularity }}
       JOB_TGI_ENABLE: ${{ inputs.tgi_enable }}
-      JOB_TGI_SINGULARITY: ${{ inputs.tgi_singularity }}
-      JOB_TGI_MODEL: ${{ inputs.tgi_model }}
+      GPFS_TGI_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.tgi_singularity }}
+      GPFS_TGI_MODEL: ${{ inputs.tgi_model }}
 
     steps:
       - uses: langtech-bsc/magma/actions/set_secrets_to_env_action@main
@@ -116,23 +116,21 @@ jobs:
           echo "JOB_PATH: ${{env.JOB_PATH}}"
           echo "JOB_NAME: ${{env.JOB_NAME}}"
           echo "JOB_LOGS_PATH: ${{env.JOB_LOGS_PATH}}"
-          echo "JOB_SINGULARITY: ${{env.JOB_SINGULARITY}}"
+          echo "GPFS_SINGULARITY: ${{env.GPFS_SINGULARITY}}"
           echo "JOB_ENABLE_TUNNEL: ${{env.JOB_ENABLE_TUNNEL}}"
           echo "JOB_JUPTER_ENABLE: ${{env.JOB_JUPTER_ENABLE}}"
-          echo "JOB_JUPITER_SINGULARITY: ${{env.JOB_JUPITER_SINGULARITY}}"
+          echo "GPFS_JUPITER_SINGULARITY: ${{env.GPFS_JUPITER_SINGULARITY}}"
           echo "JOB_TGI_ENABLE: ${{env.JOB_TGI_ENABLE}}"
-          echo "JOB_TGI_SINGULARITY: ${{env.JOB_TGI_SINGULARITY}}"
-          echo "JOB_TGI_MODEL: ${{env.JOB_TGI_MODEL}}"
-        
+          echo "GPFS_TGI_SINGULARITY: ${{env.GPFS_TGI_SINGULARITY}}"
+          echo "GPFS_TGI_MODEL: ${{env.GPFS_TGI_MODEL}}"
 
       - name: Set Socket variables
         if: ${{ env.JOB_ENABLE_TUNNEL == 'true' || env.JOB_ENABLE_TUNNEL == true}}
         run: |
-          export EXTRA_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT2 }}.sock
-          export JUPYTER_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT1 }}.sock
+          EXTRA_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT2 }}.sock
+          JUPYTER_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT1 }}.sock
           echo "EXTRA_SOCKET=${EXTRA_SOCKET}" >> $GITHUB_ENV
           echo "JUPYTER_SOCKET=${JUPYTER_SOCKET}" >> $GITHUB_ENV
-
           echo "JOB_SSH_TUNNEL_COMMAND=ssh -N -L ${{ env.PORT2 }}:${EXTRA_SOCKET} -L ${{ env.PORT1 }}:${JUPYTER_SOCKET} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" >> $GITHUB_ENV
 
       - uses: actions/checkout@v4
@@ -184,7 +182,7 @@ jobs:
           experiment_name: ${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
           remote_host: ${{ secrets.REMOTE_HOST }}
           remote_user: ${{ secrets.REMOTE_USER }}
-          remote_source_path: ${{ env.JOB_PATH }}/logs
+          remote_source_path: ${{ env.JOB_LOGS_PATH }}
           traking_url: ${{ env.MLFLOW_TRACKING_SERVER_URL }}
           run_name: ${{ env.SLURM_JOB_ID }} 
           schedule: 'true'

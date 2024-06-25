@@ -1,7 +1,7 @@
 echo "Launch tgi endpoint"
 nohup singularity run --nv \
     --bind $GPFS_MODELS_REGISTRY_PATH:/data  \
-    $GPFS_SINGULARITY_IMAGE_REGISTRY_PATH/text-generation-inference.singularity.1.4.4.sif  \
+    $GPFS_TGI_SINGULARITY  \
     --model-id /data/Mixtral-8x7B-Instruct-v0.1 \
     --hostname 0.0.0.0 \
     --port 8080 \

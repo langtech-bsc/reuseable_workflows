@@ -171,5 +171,11 @@ jobs:
         runs_on: ${{ inputs.runs_on }}
         job_path: ${{ needs.pre-job.outputs.job_path }}
         job_name: ${{ needs.pre-job.outputs.job_name }}
-        enable_tunnel: ${{ inputs.enable_tunnel }}
+        enable_tunnel: ${{ needs.pre-job.outputs.tunnel_enable }}
+        jupyter_enable: ${{ needs.pre-job.outputs.jupyter_enable }}
+        jupyter_singularity: ${{ needs.pre-job.outputs.jupyter_singularity }}
+        tgi_enable: ${{ needs.pre-job.outputs.tgi_enable }}
+        tgi_singularity: ${{ needs.pre-job.outputs.tgi_singularity }}
+        tgi_model: ${{ needs.pre-job.outputs.tgi_model }}
+        singularity: ${{ needs.pre-job.outputs.singularity }}
         

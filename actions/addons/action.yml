@@ -44,7 +44,6 @@ runs:
         if [ -f "${{inputs.file}}" ]; then
           echo "" >> file.tmp
           echo "${{ steps.globals.outputs.START_LINE }}" > file.tmp
-          echo "" >> file.tmp
         else 
           echo "File '${{inputs.file}}' does not exist" && exit 1
         fi
@@ -110,7 +109,7 @@ runs:
       shell: bash
       run: |
         echo "" >> ${{inputs.file}}
-        echo "${{ steps.globals.outputs.FIRST_LINE }}" >> ${{inputs.file}}
+        echo "${{ steps.globals.outputs.START_LINE }}" >> ${{inputs.file}}
         echo "" >> ${{inputs.file}}
         echo "echo Execute sleep" >> ${{inputs.file}}
         echo "sleep 30d" >> ${{inputs.file}}
