@@ -52,13 +52,88 @@ jobs:
             echo "exists=true" >> $GITHUB_OUTPUT
             exit 1
 
-  launch-job:
-      needs: pre-job
-      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
-      secrets: inherit
-      with: 
-        runs_on: ${{ inputs.runs_on }}
-        job_path: ${{ needs.pre-job.outputs.job_path }}
-        job_name: ${{ needs.pre-job.outputs.job_name }}
-        enable_tunnel: ${{ inputs.enable_tunnel }}
+      - uses: actions/checkout@v4
+
+      - uses: actions-tools/yaml-outputs@8a3d95c649e970fbe0fb68b11e21a64a9b7bb1b0
+        id: yaml
+        with:
+          export-env-variables: false
+          file-path: './config.yaml'
+          fail-on-file-not-found: false
+          separator: '_'
+        continue-on-error: true
+
+      - name: Set default values if not set
+        run: |
+          DEFAULT_REPO_BRANCH="${{ github.repository }}/${{ github.ref_name }}"
+
+          # Set default for tunnel.enable
+          if [ -z "${{ steps.yaml.outputs.tunnel_enable }}" ]; then
+            echo "tunnel_enable=false" >> $GITHUB_ENV
+          else
+            echo "tunnel_enable=${{ steps.yaml.outputs.tunnel_enable }}" >> $GITHUB_ENV
+          fi
+
+          # Set default for jupyter.enable
+          if [ -z "${{ steps.yaml.outputs.jupyter_enable }}" ]; then
+            echo "jupyter_enable=false" >> $GITHUB_ENV
+          else
+            echo "jupyter_enable=${{ steps.yaml.outputs.jupyter_enable }}" >> $GITHUB_ENV
+          fi
+
+          # Set default for jupyter.singularity
+          if [ -z "${{ steps.yaml.outputs.jupyter_singularity }}" ]; then
+            echo "jupyter_singularity=python-jupyter.sif" >> $GITHUB_ENV
+          else
+            echo "jupyter_singularity=${{ steps.yaml.outputs.jupyter_singularity }}" >> $GITHUB_ENV
+          fi
+
+          # Set default for tgi.enable
+          if [ -z "${{ steps.yaml.outputs.tgi_enable }}" ]; then
+            echo "tgi_enable=false" >> $GITHUB_ENV
+          else
+            echo "tgi_enable=${{ steps.yaml.outputs.tgi_enable }}" >> $GITHUB_ENV
+          fi
+
+          # Set default for tgi.singularity
+          if [ -z "${{ steps.yaml.outputs.tgi_singularity }}" ]; then
+            echo "tgi_singularity=text-generation-inference.singularity.1.4.4.sif" >> $GITHUB_ENV
+          else
+            echo "tgi_singularity=${{ steps.yaml.outputs.tgi_singularity }}" >> $GITHUB_ENV
+          fi
+
+          # Set default for tgi.model
+          if [ -z "${{ steps.yaml.outputs.tgi_model }}" ]; then
+            echo "tgi_model=" >> $GITHUB_ENV
+          else
+            echo "tgi_model=${{ steps.yaml.outputs.tgi_model }}" >> $GITHUB_ENV
+          fi
+
+          # Set default for singularity (uncomment if needed)
+          if [ -z "${{ steps.yaml.outputs.singularity }}" ]; then
+            echo "singularity=$DEFAULT_REPO_BRANCH" >> $GITHUB_ENV
+          else
+            echo "singularity=${{ steps.yaml.outputs.singularity }}" >> $GITHUB_ENV
+          fi
+
+      - name: Output configuration
+        run: |
+          echo "tunnel_enable=${{ env.tunnel_enable }}"
+          echo "jupyter_enable=${{ env.jupyter_enable }}"
+          echo "jupyter_singularity=${{ env.jupyter_singularity }}"
+          echo "tgi_enable=${{ env.tgi_enable }}"
+          echo "tgi_singularity=${{ env.tgi_singularity }}"
+          echo "tgi_model=${{ env.tgi_model }}"
+          echo "singularity=${{ env.singularity }}"
+            
+        
+  # launch-job:
+  #     needs: pre-job
+  #     uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+  #     secrets: inherit
+  #     with: 
+  #       runs_on: ${{ inputs.runs_on }}
+  #       job_path: ${{ needs.pre-job.outputs.job_path }}
+  #       job_name: ${{ needs.pre-job.outputs.job_name }}
+  #       enable_tunnel: ${{ inputs.enable_tunnel }}
         
