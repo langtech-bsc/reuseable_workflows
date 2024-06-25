@@ -8,7 +8,5 @@ jobs:
   test-workflow-job-enhanced-launch-job:
     uses: ./.github/workflows/enhanced_launch_job.yml
     secrets: inherit
-    with:
-      runs_on: ubuntu-latest 
 
       

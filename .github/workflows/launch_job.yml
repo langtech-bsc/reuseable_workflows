@@ -96,6 +96,7 @@ jobs:
           
           if [ '${{ env.JOB_JUPTER_ENABLE }}' = 'true' ] || [ '${{ env.JOB_TGI_ENABLE }}' = 'true' ]; then
             echo "JOB_ENABLE_TUNNEL=true" >> $GITHUB_ENV
+            echo "JOB_SLEEP=true" >> $GITHUB_ENV
           fi
 
           if [ -z "${{ env.JOB_NAME }}" ]; then 
@@ -143,7 +144,9 @@ jobs:
       - uses: langtech-bsc/magma/actions/addons@main
         with:
           file: "src/launch.sh"
-          jupyter: false
+          jupyter: ${{ env.JOB_JUPTER_ENABLE }}
+          tgi: ${{ env.JOB_TGI_ENABLE }}
+          sleep: ${{ env.JOB_SLEEP }}
 
       - name: Pre launch modifications
         run: |
