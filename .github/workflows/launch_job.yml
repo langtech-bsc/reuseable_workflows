@@ -126,7 +126,7 @@ jobs:
         
 
       - name: Set Socket variables
-        if: ${{ env.JOB_ENABLE_TUNNEL == true }}
+        if: ${{ env.JOB_ENABLE_TUNNEL == 'true' }}
         run: |
           export EXTRA_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT2 }}.sock
           export JUPYTER_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT1 }}.sock
