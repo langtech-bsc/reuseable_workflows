@@ -6,7 +6,7 @@ on:
 
 jobs:
   test-workflow-job-enhanced-launch-job:
-    uses: langtech-bsc/magma/.github/workflows/enhanced_launch_job.yml@33-add-yml-config-file
+    uses: ./.github/workflows/enhanced_launch_job.yml
     secrets: inherit
     with:
       runs_on: ubuntu-latest 
