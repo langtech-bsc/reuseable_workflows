@@ -53,6 +53,11 @@ on:
         type: string
         default: 'Mixtral-8x7B-Instruct-v0.1'
 
+      tgi_params:
+        required: false
+        type: string
+        default: ''
+
       
 
 jobs:
@@ -71,6 +76,7 @@ jobs:
       JOB_TGI_ENABLE: ${{ inputs.tgi_enable }}
       GPFS_TGI_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.tgi_singularity }}
       GPFS_TGI_MODEL: ${{ inputs.tgi_model }}
+      JOB_TGI_PARAMS: ${{ inputs.tgi_params }}
 
     steps:
       - uses: langtech-bsc/magma/actions/set_secrets_to_env_action@main
@@ -186,12 +192,15 @@ jobs:
           traking_url: ${{ env.MLFLOW_TRACKING_SERVER_URL }}
           run_name: ${{ env.SLURM_JOB_ID }} 
           schedule: 'true'
+        continue-on-error: true
       
       - name: Monitoring and status (CHECK THE LOGS HERE)
         run: |
           if [ -z "${{ steps.mlflow.outputs.artifact_url }}" ]; then
             echo "Mlflow API is not available, please contact MLOps team or try running the workflow again"
             echo "If you are running the workflow locally with act, ensure you have BSC VPN connected"
+            hpc-rocket cancel rocket.yml --jobid ${{ env.SLURM_JOB_ID }}
+            echo "Job canceled: ${{ env.SLURM_JOB_ID }}"
             exit 1
           else
             echo "Check the logs at: ${{ steps.mlflow.outputs.artifact_url }}"

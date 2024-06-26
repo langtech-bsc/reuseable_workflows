@@ -28,7 +28,7 @@ jobs:
         tgi_singularity: ${{ steps.set_defaults.outputs.tgi_singularity }}
         tgi_model: ${{ steps.set_defaults.outputs.tgi_model }}
         singularity: ${{ steps.set_defaults.outputs.singularity }}
-        default_singularity: ${{ steps.default_singularity.outputs.default_singularity }}
+        # default_singularity: ${{ steps.default_singularity.outputs.default_singularity }}
 
       steps:
 
@@ -135,17 +135,20 @@ jobs:
             echo "singularity=${{ steps.yaml.outputs.singularity }}" >> $GITHUB_OUTPUT
           fi
 
+          # Set tgi params
+          echo "tgi_params=${{ steps.yaml.outputs.tgi_params }}" >> $GITHUB_OUTPUT
 
-      - name: Check if singularity image from current repo
-        id: default_singularity
-        run: |
-          if [ "${{ steps.set_defaults.outputs.jupyter_singularity }}" = "${{ steps.job_variables.outputs.repo_branch }}" ] || \
-            [ "${{ steps.set_defaults.outputs.tgi_singularity }}" = "${{ steps.job_variables.outputs.repo_branch }}" ] || \
-            [ "${{ steps.set_defaults.outputs.singularity }}" = "${{ steps.job_variables.outputs.repo_branch }}" ]; then
-             echo "default_singularity=true" >> $GITHUB_OUTPUT
-          else
-            echo "default_singularity=false" >> $GITHUB_OUTPUT
-          fi
+          
+      # - name: Check if singularity image from current repo
+      #   id: default_singularity
+      #   run: |
+      #     if [ "${{ steps.set_defaults.outputs.jupyter_singularity }}" = "${{ steps.job_variables.outputs.repo_branch }}" ] || \
+      #       [ "${{ steps.set_defaults.outputs.tgi_singularity }}" = "${{ steps.job_variables.outputs.repo_branch }}" ] || \
+      #       [ "${{ steps.set_defaults.outputs.singularity }}" = "${{ steps.job_variables.outputs.repo_branch }}" ]; then
+      #        echo "default_singularity=true" >> $GITHUB_OUTPUT
+      #     else
+      #       echo "default_singularity=false" >> $GITHUB_OUTPUT
+      #     fi
           
       
       - name: Output configuration
@@ -160,12 +163,13 @@ jobs:
           echo "tgi_enable: ${{ steps.set_defaults.outputs.tgi_enable }}"
           echo "tgi_singularity: ${{ steps.set_defaults.outputs.tgi_singularity }}"
           echo "tgi_model: ${{ steps.set_defaults.outputs.tgi_model }}"
+          echo "tgi_params: ${{ steps.set_defaults.outputs.tgi_params }}"
           echo "singularity: ${{ steps.set_defaults.outputs.singularity }}"
-          echo "default_singularity: ${{ steps.default_singularity.outputs.default_singularity }}"
+          # echo "default_singularity: ${{ steps.default_singularity.outputs.default_singularity }}"
         
   launch-job:
       needs: pre-job
-      uses: langtech-bsc/magma/.github/workflows/launch_job.yml
+      uses: ./.github/workflows/launch_job.yml
       secrets: inherit
       with: 
         runs_on: ${{ inputs.runs_on }}
@@ -177,5 +181,6 @@ jobs:
         tgi_enable: ${{ needs.pre-job.outputs.tgi_enable }}
         tgi_singularity: ${{ needs.pre-job.outputs.tgi_singularity }}
         tgi_model: ${{ needs.pre-job.outputs.tgi_model }}
+        tgi_params: ${{ needs.pre-job.outputs.tgi_params }}
         singularity: ${{ needs.pre-job.outputs.singularity }}
         

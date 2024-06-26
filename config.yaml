@@ -7,14 +7,14 @@
 
 
 tunnel:
-  enable: true # Default false
+  enable: false # Default false. If tgi or jupyter is enable, always enable
 
 jupyter:
-  enable: true # Default false. If you enable jupyter,you should enable tunnel also.
+  enable: false # Default false. If you enable jupyter,you should enable tunnel also.
   singularity: python-jupyter.sif 
 
 tgi: # Text generation infrence
-  enable: false # Default false. If you enable tgi,you should enable tunnel also.
+  enable: true # Default false. If you enable tgi,you should enable tunnel also.
   singularity: text-generation-inference.singularity.1.4.4.sif
   model: Mixtral-8x7B-Instruct-v0.1 # The model must exists in $GPFS_SINGULARITY_IMAGE_REGISTRY_PATH.
   params: --max-input-length 8000 --max-batch-prefill-tokens 8000 --max-total-tokens 12000
