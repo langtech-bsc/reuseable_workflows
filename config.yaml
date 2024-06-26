@@ -16,7 +16,7 @@ jupyter:
 tgi: # Text generation infrence
   enable: true # Default false. If you enable tgi,you should enable tunnel also.
   singularity: text-generation-inference.singularity.1.4.4.sif
-  model: Mixtral-8x7B-Instruct-v0.1 # The model must exists in $GPFS_SINGULARITY_IMAGE_REGISTRY_PATH.
+  model: Mistral-7B-Instruct-v0.3 # The model must exists in $GPFS_SINGULARITY_IMAGE_REGISTRY_PATH.
   params: --max-input-length 8000 --max-batch-prefill-tokens 8000 --max-total-tokens 12000
 
 # Un comment to get access to custom image from $GPFS_SINGULARITY_IMAGE_REGISTRY_PATH. Default: <current_repo>/<current_branch>.

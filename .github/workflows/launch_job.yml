@@ -51,7 +51,7 @@ on:
       tgi_model:
         required: false
         type: string
-        default: 'Mixtral-8x7B-Instruct-v0.1'
+        default: 'Mistral-7B-Instruct-v0.3'
 
       tgi_params:
         required: false
@@ -96,29 +96,30 @@ jobs:
           JOB_REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}
           JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}
 
-          echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> $GITHUB_ENV
-          echo "JOB_BRANCH=${JOB_BRANCH}" >> $GITHUB_ENV
+          echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> "$GITHUB_ENV"
+          echo "JOB_BRANCH=${JOB_BRANCH}" >> "$GITHUB_ENV"
           
           if [ '${{ env.JOB_JUPTER_ENABLE }}' = 'true' ] || [ '${{ env.JOB_TGI_ENABLE }}' = 'true' ]; then
-            echo "JOB_ENABLE_TUNNEL=true" >> $GITHUB_ENV
-            echo "JOB_SLEEP=true" >> $GITHUB_ENV
+            echo "JOB_ENABLE_TUNNEL=true" >> "$GITHUB_ENV"
+            echo "JOB_SLEEP=true" >> "$GITHUB_ENV"
           fi
 
           if [ -z "${{ env.JOB_NAME }}" ]; then 
-            echo "JOB_NAME=${JOB_REPO_NAME}-${{ github.run_number }}" >> $GITHUB_ENV
+            echo "JOB_NAME=${JOB_REPO_NAME}-${{ github.run_number }}" >> "$GITHUB_ENV"
           fi
 
-          if [ -z "${{ inputs.tgi_params }}" ]; then
-            echo "JOB_TGI_PARAMS: ${{ inputs.tgi_params }}" >> $GITHUB_ENV
+          if [ -n "${{ inputs.tgi_params }}" ]; then
+            echo "JOB_TGI_PARAMS=${{ inputs.tgi_params }}" >> "$GITHUB_ENV"
           fi
 
           if [ -z "${{ env.JOB_PATH }}" ]; then
             JOB_PATH="/gpfs/scratch/${{ secrets.REMOTE_GROUP }}/${{ secrets.REMOTE_USER }}/jobs/${JOB_REPO_NAME}/${{ github.run_number }}"
           fi
-          echo "JOB_PATH=$JOB_PATH" >> $GITHUB_ENV
-          echo "JOB_LOGS_PATH=$JOB_PATH/logs" >> $GITHUB_ENV
+
+          echo "JOB_PATH=$JOB_PATH" >> "$GITHUB_ENV"
+          echo "JOB_LOGS_PATH=$JOB_PATH/logs" >> "$GITHUB_ENV"
       
-      - name: Log job variables
+      - name: Log job variables (Job path, job name, etc)
         run: |
           echo "Job variables"
           echo "JOB_PATH: ${{env.JOB_PATH}}"
@@ -131,14 +132,15 @@ jobs:
           echo "JOB_TGI_ENABLE: ${{env.JOB_TGI_ENABLE}}"
           echo "GPFS_TGI_SINGULARITY: ${{env.GPFS_TGI_SINGULARITY}}"
           echo "GPFS_TGI_MODEL: ${{env.GPFS_TGI_MODEL}}"
+          echo "JOB_SLEEP: ${{env.JOB_SLEEP}}"
 
       - name: Set Socket variables
         if: ${{ env.JOB_ENABLE_TUNNEL == 'true' || env.JOB_ENABLE_TUNNEL == true}}
         run: |
           EXTRA_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT2 }}.sock
           JUPYTER_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT1 }}.sock
-          echo "EXTRA_SOCKET=${EXTRA_SOCKET}" >> $GITHUB_ENV
-          echo "JUPYTER_SOCKET=${JUPYTER_SOCKET}" >> $GITHUB_ENV
+          echo "EXTRA_SOCKET=${EXTRA_SOCKET}" >> "$GITHUB_ENV"
+          echo "JUPYTER_SOCKET=${JUPYTER_SOCKET}" >> "$GITHUB_ENV"
           echo "JOB_SSH_TUNNEL_COMMAND=ssh -N -L ${{ env.PORT2 }}:${EXTRA_SOCKET} -L ${{ env.PORT1 }}:${JUPYTER_SOCKET} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" >> $GITHUB_ENV
 
       - uses: actions/checkout@v4
@@ -158,6 +160,7 @@ jobs:
         run: |
           sed -i "s|\%JOB_NAME%|${{ env.JOB_NAME }}|" src/launch.sh
           sed -i "s|\%JOB_LOGS_PATH%|${{ env.JOB_LOGS_PATH  }}|" src/launch.sh
+          sed -i "s|\%JOB_PATH%|${{ env.JOB_PATH  }}|" src/launch.sh
 
       # - name: Set up Python
       #   uses: actions/setup-python@v5
@@ -181,7 +184,7 @@ jobs:
           tempfile=$(mktemp)
           hpc-rocket launch rocket.yml 2>&1 | tee "$tempfile"
           output=$(cat "$tempfile")
-          echo "SLURM_JOB_ID=$(echo "$output" | grep -oE 'job [0-9]+' | grep -oE '[0-9]+')" >> $GITHUB_ENV
+          echo "SLURM_JOB_ID=$(echo "$output" | grep -oE 'job [0-9]+' | grep -oE '[0-9]+')" >> "$GITHUB_ENV"
       
       - name: Setup mlflow
         id: mlflow
