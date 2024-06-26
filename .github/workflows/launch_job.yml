@@ -149,7 +149,7 @@ jobs:
         run: |
           env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
       
-      - uses: ./actions/addons
+      - uses: langtech/magma/actions/addons@main
         with:
           file: "src/launch.sh"
           jupyter: ${{ env.JOB_JUPTER_ENABLE }}
