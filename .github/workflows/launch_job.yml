@@ -72,7 +72,7 @@ jobs:
       GPFS_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.singularity }}
       JOB_ENABLE_TUNNEL: ${{ inputs.enable_tunnel }}
       JOB_JUPTER_ENABLE: ${{ inputs.jupyter_enable }}
-      GPFS_JUPITER_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.jupyter_singularity }}
+      GPFS_JUPYTER_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.jupyter_singularity }}
       JOB_TGI_ENABLE: ${{ inputs.tgi_enable }}
       GPFS_TGI_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.tgi_singularity }}
       GPFS_TGI_MODEL: ${{ inputs.tgi_model }}
@@ -128,7 +128,7 @@ jobs:
           echo "GPFS_SINGULARITY: ${{env.GPFS_SINGULARITY}}"
           echo "JOB_ENABLE_TUNNEL: ${{env.JOB_ENABLE_TUNNEL}}"
           echo "JOB_JUPTER_ENABLE: ${{env.JOB_JUPTER_ENABLE}}"
-          echo "GPFS_JUPITER_SINGULARITY: ${{env.GPFS_JUPITER_SINGULARITY}}"
+          echo "GPFS_JUPYTER_SINGULARITY: ${{env.GPFS_JUPYTER_SINGULARITY}}"
           echo "JOB_TGI_ENABLE: ${{env.JOB_TGI_ENABLE}}"
           echo "GPFS_TGI_SINGULARITY: ${{env.GPFS_TGI_SINGULARITY}}"
           echo "GPFS_TGI_MODEL: ${{env.GPFS_TGI_MODEL}}"

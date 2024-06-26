@@ -18,5 +18,5 @@ tgi: # Text generation infrence
   params: --max-input-length 8000 --max-batch-prefill-tokens 8000 --max-total-tokens 12000 # Must be valid parameters, otherwise tgi will throw error
 
 # Un comment to get access to custom image from $GPFS_SINGULARITY_IMAGE_REGISTRY_PATH. Default: <current_repo>/<current_branch>.
-# You will have access to this image through $GPFS_JUPITER_SINGULARITY. 
+# You will have access to this image through $GPFS_JUPYTER_SINGULARITY. 
 # singularity: python-jupyter.sif
