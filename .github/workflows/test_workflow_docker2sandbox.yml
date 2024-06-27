@@ -1,0 +1,16 @@
+name: Test job enhanced launch job
+run-name: ${{ github.actor }} is executing Test job enhanced launch job 🚀
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-workflow-docker2sandbox:
+    uses: ./.github/workflows/docker2sandbox.yml
+    secrets: inherit
+    with:
+      dir: ${{vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/sandbox
+      name: jupyter
+
+
+      

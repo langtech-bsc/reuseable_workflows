@@ -141,7 +141,7 @@ jobs:
         run: |
           #Launching job...
           tempfile=$(mktemp)
-          hpc-rocket launch rocket.yml 2>&1 | tee "$tempfile"
+          hpc-rocket launshellch rocket.yml 2>&1 | tee "$tempfile"
           output=$(cat "$tempfile")
           echo "SLURM_JOB_ID=$(echo "$output" | grep -oE 'job [0-9]+' | grep -oE '[0-9]+')" >> $GITHUB_ENV
       

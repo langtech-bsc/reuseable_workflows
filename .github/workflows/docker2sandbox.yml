@@ -1,0 +1,94 @@
+name: Make singularity
+#run-name: ${{ github.actor }} is executing Make singularity 🚀
+
+on:
+  workflow_call:
+    inputs:
+      dir:
+        required: true
+        type: string
+        default: ''
+      name:
+        required: true
+        type: string
+        default: ''
+      overwrite:
+        required: false
+        type: boolean
+        default: false
+  
+jobs:
+  docker2singularity:
+    timeout-minutes: 43200
+    runs-on: shell
+    env:
+      DIR: ${{ inputs.dir }}
+      NAME: ${{ inputs.name }}
+
+    steps:
+      # - name: Pre-check on overwrite
+      #   shell: bash
+      #   if: ${{ inputs.overwrite == true }}
+      #   run: |
+
+      # - name: Pre-check on not overwrite
+      #   shell: bash
+      #   if: ${{ inputs.overwrite == true }}
+      #   run: |
+          
+
+      - name: Log name
+        shell: bash
+        run: |
+          echo "DIR: ${{ env.DIR }}"
+          echo "NAME: ${{ env.NAME }}"
+          echo "OVERWRITE: ${{ inputs.overwrite }}"
+
+      - uses: actions/checkout@v4
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{secrets.SSH_PRIVATE_KEY}}
+
+      - name: Build docker image
+        run: docker build . --no-cache -t user/${{env.NAME}}:latest
+          
+      - name: Save docker image
+        run: |
+          docker save user/${{env.NAME}}:latest -o ${{env.NAME}}.tar 
+          docker image rm user/${{env.NAME}}:latest
+
+      - name: Push docker tar and build sandbox
+        run: |
+          echo "Creating directory"
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.REMOTE_USER}}@${{secrets.REMOTE_HOST}} "mkdir -p ${{env.DIR}}"
+
+          echo "Push docker tar file"
+          scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{env.NAME}}.tar ${{secrets.REMOTE_USER}}@${{secrets.REMOTE_HOST}}:${{ env.DIR }}
+          rm ${{env.NAME}}.tar
+          
+          echo "Build sandbox in cluster"
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.REMOTE_USER}}@${{secrets.REMOTE_HOST}} "cd ${{ env.DIR }} && module load singularity && singularity build --sandbox --force ${{env.NAME}} docker-archive:${{env.NAME}}.tar"
+          ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{secrets.REMOTE_USER}}@${{secrets.REMOTE_HOST}} "cd ${{ env.DIR }} && rm ${{env.NAME}}.tar"
+          echo "Sand box create"
+
+          # singularity shell --nv --contain --no-home jupyter/
+
+      # - name: Push and create sandbox (hpc-rocket)
+      #   run: |
+      #     tempfile=$(mktemp)
+      #     hpc-rocket launch rocket.yaml 2>&1 | tee "$tempfile"
+      #     output=$(cat "$tempfile")
+      #     echo "SLURM_JOB_ID=$(echo '$output' | grep -oE 'job [0-9]+' | grep -oE '[0-9]+')" >> $GITHUB_ENV  
+          
+      # - name: Watch job
+      #   id: watch
+      #   run: |
+      #     (while true; do
+      #       hpc-rocket status rocket.yml --jobid ${{ env.SLURM_JOB_ID }} 
+      #       sleep 20
+      #     done) &
+      #     hpc-rocket watch rocket.yml --jobid ${{ env.SLURM_JOB_ID }}
+
+        
+
