@@ -3,7 +3,7 @@
 
 #===========TEST workflows===================
 run-gh-run-test-workflow-job-enhanced-launch-job:
-	gh act -j test-workflow-job-enhanced-launch-job \
+	act -j test-workflow-job-enhanced-launch-job \
 	 -W .github/workflows/test_workflow_enhanced_launch_job.yml \
 	 --secret-file my.secrets \
 	 --var-file .env \
@@ -13,7 +13,7 @@ run-gh-run-test-workflow-job-enhanced-launch-job:
 
 
 run-gh-run-test-workflow-job-launch-job:
-	gh act -j test-workflow-job-launch-job \
+	act -j test-workflow-job-launch-job \
 	 -W .github/workflows/test_workflow_launch_job.yml \
 	 --secret-file my.secrets \
 	 --var-file .env \
@@ -23,7 +23,7 @@ run-gh-run-test-workflow-job-launch-job:
 
 #===========TEST actions===================
 run-gh-run-test-action-addons:
-	gh act -j test-action-addons \
+	act -j test-action-addons \
 	 -W .github/workflows/test_action_addons.yml \
 	 --secret-file my.secrets \
 	 --var-file .env \
