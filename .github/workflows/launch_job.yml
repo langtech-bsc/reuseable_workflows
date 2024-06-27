@@ -28,7 +28,7 @@ on:
         type: boolean
         default: false
 
-      jupyter_enable:
+      enable_jupyter:
         required: false
         type: boolean
         default: true
@@ -38,7 +38,7 @@ on:
         type: string
         default: 'python-jupyter.sif'
 
-      tgi_enable:
+      enable_tgi:
         required: false
         type: boolean
         default: false
@@ -58,8 +58,6 @@ on:
         type: string
         default: ''
 
-      
-
 jobs:
   launch-job:
     timeout-minutes: 43200
@@ -71,9 +69,9 @@ jobs:
       JOB_NAME: ${{ inputs.job_name }}
       GPFS_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.singularity }}
       JOB_ENABLE_TUNNEL: ${{ inputs.enable_tunnel }}
-      JOB_JUPTER_ENABLE: ${{ inputs.jupyter_enable }}
+      JOB_JUPTER_ENABLE: ${{ inputs.enable_jupyter }}
       GPFS_JUPYTER_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.jupyter_singularity }}
-      JOB_TGI_ENABLE: ${{ inputs.tgi_enable }}
+      JOB_TGI_ENABLE: ${{ inputs.enable_tgi }}
       GPFS_TGI_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.tgi_singularity }}
       GPFS_TGI_MODEL: ${{ inputs.tgi_model }}
 

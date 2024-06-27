@@ -7,10 +7,6 @@ on:
         required: false
         type: string
         default: magma-runner-set
-      enable_tunnel:
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   pre-job:
@@ -21,13 +17,14 @@ jobs:
         job_path: ${{ steps.job_variables.outputs.job_path }}
         exists: ${{ steps.exists.outputs.exists }}
 
-        tunnel_enable: ${{ steps.set_defaults.outputs.tunnel_enable }}
-        jupyter_enable: ${{ steps.set_defaults.outputs.jupyter_enable }}
+        enable_tunnel: ${{ steps.set_defaults.outputs.enable_tunnel }}
+        enable_jupyter: ${{ steps.set_defaults.outputs.enable_jupyter }}
         jupyter_singularity: ${{ steps.set_defaults.outputs.jupyter_singularity }}
-        tgi_enable: ${{ steps.set_defaults.outputs.tgi_enable }}
+        enable_tgi: ${{ steps.set_defaults.outputs.enable_tgi }}
         tgi_singularity: ${{ steps.set_defaults.outputs.tgi_singularity }}
         tgi_model: ${{ steps.set_defaults.outputs.tgi_model }}
         singularity: ${{ steps.set_defaults.outputs.singularity }}
+        tgi_params: ${{ steps.set_defaults.outputs.tgi_params }}
         # default_singularity: ${{ steps.default_singularity.outputs.default_singularity }}
 
       steps:
@@ -78,9 +75,9 @@ jobs:
         id: set_defaults
         env:
           DEFAULT_TUNNEL_ENABLE: "false"
-          DEFAULT_JUPYTER_ENABLE: "false"
+          DEFAULT_ENABLE_JUPYTER: "false"
           DEFAULT_JUPYTER_SINGULARITY: "python-jupyter.sif"
-          DEFAULT_TGI_ENABLE: "false"
+          DEFAULT_ENABLE_TGI: "false"
           DEFAULT_TGI_SINGULARITY: "text-generation-inference.singularity.1.4.4.sif"
           DEFAULT_TGI_MODEL: "Mixtral-8x7B-Instruct-v0.1"
           CURRENT_REPO_BRANCH: "${{ steps.job_variables.outputs.repo_branch }}"
@@ -88,16 +85,16 @@ jobs:
         run: |
           # Set default for tunnel.enable
           if [ -z "${{ steps.yaml.outputs.tunnel_enable }}" ]; then
-            echo "tunnel_enable=${{ env.DEFAULT_TUNNEL_ENABLE }}" >> $GITHUB_OUTPUT
+            echo "enable_tunnel=${{ env.DEFAULT_TUNNEL_ENABLE }}" >> $GITHUB_OUTPUT
           else
-            echo "tunnel_enable=${{ steps.yaml.outputs.tunnel_enable }}" >> $GITHUB_OUTPUT
+            echo "enable_tunnel=${{ steps.yaml.outputs.tunnel_enable }}" >> $GITHUB_OUTPUT
           fi
 
           # Set default for jupyter.enable
           if [ -z "${{ steps.yaml.outputs.jupyter_enable }}" ]; then
-            echo "jupyter_enable=${{ env.DEFAULT_JUPYTER_ENABLE }}" >> $GITHUB_OUTPUT
+            echo "enable_jupyter=${{ env.DEFAULT_ENABLE_JUPYTER }}" >> $GITHUB_OUTPUT
           else
-            echo "jupyter_enable=${{ steps.yaml.outputs.jupyter_enable }}" >> $GITHUB_OUTPUT
+            echo "enable_jupyter=${{ steps.yaml.outputs.jupyter_enable }}" >> $GITHUB_OUTPUT
           fi
 
           # Set default for jupyter.singularity
@@ -109,9 +106,9 @@ jobs:
 
           # Set default for tgi.enable
           if [ -z "${{ steps.yaml.outputs.tgi_enable }}" ]; then
-            echo "tgi_enable=${{ env.DEFAULT_TGI_ENABLE }}" >> $GITHUB_OUTPUT
+            echo "enable_tgi=${{ env.DEFAULT_ENABLE_TGI }}" >> $GITHUB_OUTPUT
           else
-            echo "tgi_enable=${{ steps.yaml.outputs.tgi_enable }}" >> $GITHUB_OUTPUT
+            echo "enable_tgi=${{ steps.yaml.outputs.tgi_enable }}" >> $GITHUB_OUTPUT
           fi
 
           # Set default for tgi.singularity
@@ -157,10 +154,10 @@ jobs:
           echo "repo_branch: ${{ steps.job_variables.outputs.repo_branch }}"
           echo "job_path: ${{ steps.job_variables.outputs.job_path }}"
           echo ""
-          echo "tunnel_enable: ${{ steps.set_defaults.outputs.tunnel_enable }}"
-          echo "jupyter_enable: ${{ steps.set_defaults.outputs.jupyter_enable }}"
+          echo "enable_tunnel: ${{ steps.set_defaults.outputs.enable_tunnel }}"
+          echo "enable_jupyter: ${{ steps.set_defaults.outputs.enable_jupyter }}"
           echo "jupyter_singularity: ${{ steps.set_defaults.outputs.jupyter_singularity }}"
-          echo "tgi_enable: ${{ steps.set_defaults.outputs.tgi_enable }}"
+          echo "enable_tgi: ${{ steps.set_defaults.outputs.enable_tgi }}"
           echo "tgi_singularity: ${{ steps.set_defaults.outputs.tgi_singularity }}"
           echo "tgi_model: ${{ steps.set_defaults.outputs.tgi_model }}"
           echo "tgi_params: ${{ steps.set_defaults.outputs.tgi_params }}"
@@ -175,12 +172,13 @@ jobs:
         runs_on: ${{ inputs.runs_on }}
         job_path: ${{ needs.pre-job.outputs.job_path }}
         job_name: ${{ needs.pre-job.outputs.job_name }}
-        enable_tunnel: ${{ needs.pre-job.outputs.tunnel_enable }}
-        jupyter_enable: ${{ needs.pre-job.outputs.jupyter_enable }}
+        enable_tunnel: ${{ needs.pre-job.outputs.enable_tunnel }}
+        enable_jupyter: ${{ needs.pre-job.outputs.enable_jupyter }}
         jupyter_singularity: ${{ needs.pre-job.outputs.jupyter_singularity }}
-        tgi_enable: ${{ needs.pre-job.outputs.tgi_enable }}
+        enable_tgi: ${{ needs.pre-job.outputs.enable_tgi }}
         tgi_singularity: ${{ needs.pre-job.outputs.tgi_singularity }}
         tgi_model: ${{ needs.pre-job.outputs.tgi_model }}
         tgi_params: ${{ needs.pre-job.outputs.tgi_params }}
         singularity: ${{ needs.pre-job.outputs.singularity }}
-        
+
+ 
