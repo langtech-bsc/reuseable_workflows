@@ -20,3 +20,12 @@ run-gh-run-test-action-addons:
 	 --no-cache-server \
 	 --container-architecture linux/amd64 \
 	 --pull=true -P magma-runner-set=projecteaina/actions-runner:latest
+	 
+run-gh-run-test-action-install-python-apt-singularity:
+	act -j test-action-install-python-apt-singularity \
+	 -W .github/workflows/test_action_install-python-apt-singularity.yml \
+	 --secret-file my.secrets \
+	 --var-file .env \
+	 --no-cache-server \
+	 --container-architecture linux/amd64 \
+	 --pull=true -P magma-runner-set=projecteaina/actions-runner:latest

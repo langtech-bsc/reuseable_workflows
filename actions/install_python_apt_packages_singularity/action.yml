@@ -1,0 +1,44 @@
+name: Docker to sandbox or singularity
+description: "GitHub Action verify whether a job is running or not"
+author: Ankush Raj <https://www.bsc.es/rana-ankush>
+
+inputs:
+  dir:
+    required: true
+    type: string
+  sandbox:
+    required: true
+    type: string
+  remote_user:
+    required: false
+    type: string
+  remote_host:
+    required: false
+    type: sting
+
+outputs:
+  error:
+    description: "true, if any error during installation"
+    value: ${{ steps.error.outputs.exists }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Log names
+      shell: bash
+      run: |
+        echo "DIR: ${{ inputs.DIR }}"
+        echo "SANDBOX: ${{ inputs.sandbox }}"
+
+    - name: Check connection
+      shell: bash
+      if: ${{ inputs.overwrite == true || inputs.overwrite == 'true' }}
+      run: |
+        ssh ${{ steps.globals.outputs.SSH_OPTIONS }} ${{inputs.remote_user}}@${{inputs.remote_host}} 2>/dev/null "exit"
+        if [ $? -ne 0 ]; then
+          echo 'SSH connection failed'
+          exit 1
+        fi
+
+      
+    - name: 
