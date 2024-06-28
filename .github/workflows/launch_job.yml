@@ -140,12 +140,13 @@ jobs:
           JUPYTER_SOCKET=${{ env.JOB_PATH }}/socket${{ env.PORT1 }}.sock
           echo "EXTRA_SOCKET=${EXTRA_SOCKET}" >> "$GITHUB_ENV"
           echo "JUPYTER_SOCKET=${JUPYTER_SOCKET}" >> "$GITHUB_ENV"
-          echo "JOB_SSH_TUNNEL_COMMAND=ssh -N -L ${{ env.PORT2 }}:${EXTRA_SOCKET} -L ${{ env.PORT1 }}:${JUPYTER_SOCKET} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}" >> $GITHUB_ENV
+          echo "JOB_SSH_TUNNEL_COMMAND='ssh -N -L ${{ env.PORT2 }}:${EXTRA_SOCKET} -L ${{ env.PORT1 }}:${JUPYTER_SOCKET} ${{ secrets.REMOTE_USER }}@${{ secrets.REMOTE_HOST }}'" >> $GITHUB_ENV
 
       - uses: actions/checkout@v4
 
       - name: Save job related env vars to file
         run: |
+          mkdir -p src/logs
           env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
       
       - uses: langtech-bsc/magma/actions/addons@main
