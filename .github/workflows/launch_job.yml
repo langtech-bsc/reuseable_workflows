@@ -108,7 +108,7 @@ jobs:
           fi
 
           if [ -n "${{ inputs.tgi_params }}" ]; then
-            echo "JOB_TGI_PARAMS=${{ inputs.tgi_params }}" >> "$GITHUB_ENV"
+            echo 'JOB_TGI_PARAMS="${{ inputs.tgi_params }}"' >> "$GITHUB_ENV"
           fi
 
           if [ -z "${{ env.JOB_PATH }}" ]; then
