@@ -11,9 +11,9 @@ run-gh-run-test-workflow-job-enhanced-launch-job:
 	 --container-architecture linux/amd64 \
 	 --pull=true -P magma-runner-set=projecteaina/actions-runner:latest, shell=catthehacker/ubuntu:act-22.04
 
-run-gh-run-test-workflow-docker2sandbox:
-	act -j test-workflow-docker2sandbox \
-	 -W .github/workflows/test_workflow_docker2sandbox.yml \
+run-gh-run-test-workflow-docker2sandbox_singularity:
+	act -j test-workflow-docker2sandbox_singularity \
+	 -W .github/workflows/test_workflow_docker2sandbox_singularity.yml \
 	 --secret-file my.secrets \
 	 --var-file .env \
 	 --no-cache-server \

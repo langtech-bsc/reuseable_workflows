@@ -1,0 +1,137 @@
+name: Docker to sandbox or singularity
+description: "GitHub Action verify whether a job is running or not"
+author: Ankush Raj <https://www.bsc.es/rana-ankush>
+
+inputs:
+  dir:
+    required: true
+    type: string
+  name:
+    required: true
+    type: string
+  overwrite:
+    required: false
+    type: boolean
+    default: false
+  remote_user:
+    required: false
+    type: string
+  remote_host:
+    required: false
+    type: sting
+  sandbox:
+    required: false
+    type: boolean
+    default: false
+
+outputs:
+  exists:
+    description: "Whether the singularity/sandbox exists or not, only when overwrite=true"
+    value: ${{ steps.check-already-exist.outputs.exists }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set globals
+      id: globals
+      shell: bash
+      run: |
+        echo "SSH_OPTIONS=-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" >> "${GITHUB_OUTPUT}"
+        if [ '${{inputs.sandbox}}' = 'true' ]; then
+          echo "SANDBOX=--sandbox" >> "${GITHUB_OUTPUT}"
+          echo "NAME=${{inputs.name}}" >> "${GITHUB_OUTPUT}"
+          echo "D_OR_F=-d" >> "${GITHUB_OUTPUT}"
+          echo "TYPE=Sandbox" >> "${GITHUB_OUTPUT}"
+        else
+          echo "NAME=${{inputs.name}}.sif" >> "${GITHUB_OUTPUT}"
+          echo "D_OR_F=-f" >> "${GITHUB_OUTPUT}"
+          echo "TYPE=Singularity" >> "${GITHUB_OUTPUT}"
+        fi
+
+
+    - name: Log name
+      shell: bash
+      run: |
+        echo "DIR: ${{ inputs.DIR }}"
+        echo "NAME: ${{ inputs.NAME }}"
+        echo "OVERWRITE: ${{ inputs.OVERWRITE }}"
+
+    - name: Check connection
+      shell: bash
+      if: ${{ inputs.overwrite == true || inputs.overwrite == 'true' }}
+      run: |
+        ssh ${{ steps.globals.outputs.SSH_OPTIONS }} ${{inputs.remote_user}}@${{inputs.remote_host}} 2>/dev/null "exit"
+        if [ $? -ne 0 ]; then
+          echo 'SSH connection failed'
+          exit 1
+        fi
+
+    - name: Check file permissions on overwrite
+      shell: bash
+      if: ${{ inputs.overwrite == true || inputs.overwrite == 'true' }}
+      run: |
+        # Check if the directory exists and if it is writable
+        ssh ${{ steps.globals.outputs.SSH_OPTIONS }} ${{inputs.remote_user}}@${{inputs.remote_host}} 2>/dev/null "
+        if [ ${{ steps.globals.outputs.D_OR_F }} ${{inputs.dir}}/${{ steps.globals.outputs.NAME }} ]; then
+          if [ ! -w ${{inputs.dir}}/${{ steps.globals.outputs.NAME }} ]; then
+            echo 'Permission denied'
+            exit 1
+          fi
+        fi
+        "
+
+    - name: Check if file already exists on not overwrite
+      shell: bash
+      id: check-already-exist
+      if: ${{ inputs.overwrite == false || inputs.overwrite == 'false'}}
+      run: |
+        value=$(ssh ${{ steps.globals.outputs.SSH_OPTIONS }} ${{inputs.remote_user}}@${{inputs.remote_host}} 2>/dev/null "
+          if [ ${{ steps.globals.outputs.D_OR_F }} '${{inputs.dir}}/${{ steps.globals.outputs.NAME }}' ]; then
+            echo 'exist'
+          fi
+        ")
+    
+        if [ "$value" = "exist" ]; then
+          echo "${{ steps.globals.outputs.TYPE }} already exists"
+          echo "exists=true" >> $GITHUB_OUTPUT
+        fi
+
+
+    - name: Check out
+      if: ${{ steps.check-already-exist.outputs.exists != 'true'}}
+      uses: actions/checkout@v4
+
+    - name: Build docker image
+      if: ${{ steps.check-already-exist.outputs.exists != 'true'}}
+      shell: bash
+      run: docker build . --no-cache -t user/${{inputs.name}}:latest
+        
+    - name: Save docker image
+      if: ${{ steps.check-already-exist.outputs.exists != 'true'}}
+      shell: bash
+      run: |
+        docker save user/${{inputs.name}}:latest -o ${{inputs.name}}.tar 
+        docker image rm user/${{inputs.name}}:latest
+
+    - name: Push docker tar and build ${{ steps.globals.outputs.TYPE }}
+      if: ${{ steps.check-already-exist.outputs.exists != 'true'}}
+      shell: bash
+      run: |
+        echo "Creating directory"
+        ssh ${{ steps.globals.outputs.SSH_OPTIONS }} ${{inputs.remote_user}}@${{inputs.remote_host}} 2>/dev/null "umask 007 && mkdir -p ${{inputs.dir}}"
+
+        echo "Pushing docker tar file"
+        scp ${{ steps.globals.outputs.SSH_OPTIONS }} ${{inputs.name}}.tar ${{inputs.remote_user}}@${{inputs.remote_host}}:${{ inputs.dir }} 2>/dev/null
+        rm ${{inputs.name}}.tar
+        
+        echo ""
+        echo "Building ${{ steps.globals.outputs.TYPE }} in cluster"
+        ssh ${{ steps.globals.outputs.SSH_OPTIONS }} ${{inputs.remote_user}}@${{inputs.remote_host}} "
+          cd ${{ inputs.dir }} &&
+          umask 007 &&
+          module load singularity &&
+          singularity build ${{ steps.globals.outputs.SANDBOX }} --force ${{ steps.globals.outputs.NAME }} docker-archive:${{inputs.name}}.tar
+        "
+        ssh ${{ steps.globals.outputs.SSH_OPTIONS }} ${{inputs.remote_user}}@${{inputs.remote_host}} 2>/dev/null "cd ${{ inputs.dir }} && rm ${{inputs.name}}.tar"
+        echo ""
+        echo "${{ steps.globals.outputs.TYPE }} created successfully"
