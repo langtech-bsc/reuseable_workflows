@@ -8,6 +8,11 @@ on:
         type: string
         default: magma-runner-set
 
+      local-repo: 
+        required: false
+        type: boolean
+        default: false
+      
 jobs:
   pre-job:
       runs-on: ${{inputs.runs_on}}
@@ -165,6 +170,26 @@ jobs:
           # echo "default_singularity: ${{ steps.default_singularity.outputs.default_singularity }}"
         
   launch-job:
+      if: ${{ needs.pre-job.result == 'success' && inputs.local-repo == false }}
+      needs: pre-job
+      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+      secrets: inherit
+      with:
+        runs_on: ${{ inputs.runs_on }}
+        job_path: ${{ needs.pre-job.outputs.job_path }}
+        job_name: ${{ needs.pre-job.outputs.job_name }}
+        enable_tunnel: ${{ needs.pre-job.outputs.enable_tunnel }}
+        enable_jupyter: ${{ needs.pre-job.outputs.enable_jupyter }}
+        jupyter_singularity: ${{ needs.pre-job.outputs.jupyter_singularity }}
+        enable_tgi: ${{ needs.pre-job.outputs.enable_tgi }}
+        tgi_singularity: ${{ needs.pre-job.outputs.tgi_singularity }}
+        tgi_model: ${{ needs.pre-job.outputs.tgi_model }}
+        tgi_params: ${{ needs.pre-job.outputs.tgi_params }}
+        singularity: ${{ needs.pre-job.outputs.singularity }}
+
+
+  launch-job-local:
+      if: ${{ needs.pre-job.result == 'success' && inputs.local-repo == true }}
       needs: pre-job
       uses: ./.github/workflows/launch_job.yml
       secrets: inherit
