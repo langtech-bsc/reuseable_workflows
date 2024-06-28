@@ -68,9 +68,9 @@ jobs:
       PORT2: "8080"
       JOB_PATH: ${{ inputs.job_path }}
       JOB_NAME: ${{ inputs.job_name }}
-      GPFS_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.singularity }}
+      JOB_SINGULARITY_IMAGE: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.singularity }}
       JOB_ENABLE_TUNNEL: ${{ inputs.enable_tunnel }}
-      JOB_JUPTER_ENABLE: ${{ inputs.enable_jupyter }}
+      JOB_ENABLE_JUPYTER: ${{ inputs.enable_jupyter }}
       GPFS_JUPYTER_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.jupyter_singularity }}
       JOB_TGI_ENABLE: ${{ inputs.enable_tgi }}
       GPFS_TGI_SINGULARITY: ${{ vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/${{ inputs.tgi_singularity }}
@@ -98,7 +98,7 @@ jobs:
           echo "JOB_REPO_NAME=${JOB_REPO_NAME}" >> "$GITHUB_ENV"
           echo "JOB_BRANCH=${JOB_BRANCH}" >> "$GITHUB_ENV"
           
-          if [ '${{ env.JOB_JUPTER_ENABLE }}' = 'true' ] || [ '${{ env.JOB_TGI_ENABLE }}' = 'true' ]; then
+          if [ '${{ env.JOB_ENABLE_JUPYTER }}' = 'true' ] || [ '${{ env.JOB_TGI_ENABLE }}' = 'true' ]; then
             echo "JOB_ENABLE_TUNNEL=true" >> "$GITHUB_ENV"
             echo "JOB_SLEEP=true" >> "$GITHUB_ENV"
           fi
@@ -126,7 +126,7 @@ jobs:
           echo "JOB_LOGS_PATH: ${{env.JOB_LOGS_PATH}}"
           echo "GPFS_SINGULARITY: ${{env.GPFS_SINGULARITY}}"
           echo "JOB_ENABLE_TUNNEL: ${{env.JOB_ENABLE_TUNNEL}}"
-          echo "JOB_JUPTER_ENABLE: ${{env.JOB_JUPTER_ENABLE}}"
+          echo "JOB_ENABLE_JUPYTER: ${{env.JOB_ENABLE_JUPYTER}}"
           echo "GPFS_JUPYTER_SINGULARITY: ${{env.GPFS_JUPYTER_SINGULARITY}}"
           echo "JOB_TGI_ENABLE: ${{env.JOB_TGI_ENABLE}}"
           echo "GPFS_TGI_SINGULARITY: ${{env.GPFS_TGI_SINGULARITY}}"
@@ -151,7 +151,7 @@ jobs:
       - uses: langtech-bsc/magma/actions/addons@main
         with:
           file: "src/launch.sh"
-          jupyter: ${{ env.JOB_JUPTER_ENABLE }}
+          jupyter: ${{ env.JOB_ENABLE_JUPYTER }}
           tgi: ${{ env.JOB_TGI_ENABLE }}
           sleep: ${{ env.JOB_SLEEP }}
 
