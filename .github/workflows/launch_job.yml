@@ -146,6 +146,7 @@ jobs:
 
       - name: Save job related env vars to file
         run: |
+          mkdir -p src/logs
           env | grep -e '^JOB_' -e '^GPFS_' > src/job.env
       
       - uses: langtech-bsc/magma/actions/addons@main
