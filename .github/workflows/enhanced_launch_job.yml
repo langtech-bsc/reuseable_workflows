@@ -166,7 +166,7 @@ jobs:
         
   launch-job:
       needs: pre-job
-      uses: langtech-bsc/magma/.github/workflows/launch_job.yml@main
+      uses: ./.github/workflows/launch_job.yml
       secrets: inherit
       with:
         runs_on: ${{ inputs.runs_on }}
