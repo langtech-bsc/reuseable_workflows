@@ -1,0 +1,40 @@
+name: Test action docker2sandbox_singularity
+run-name: ${{ github.actor }} is executing Test action docker2sandbox_singularity 🚀
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-workflow-docker2sandbox_singularity:
+    runs-on: "shell"
+    steps:
+      - name: Get globals
+        id: globals
+        run: |
+          echo "REPO_NAME=${GITHUB_REPOSITORY#$GITHUB_REPOSITORY_OWNER/}" >> $GITHUB_OUTPUT
+          echo "JOB_BRANCH=${GITHUB_HEAD_REF:-${GITHUB_REF#refs/heads/}}" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v4
+
+      - uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - uses: ./actions/docker2sandbox_singularity
+        id: docker2sandbox
+        with:
+          dir: ${{vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/sandboxs/${{ steps.globals.outputs.REPO_NAME }}
+          name: ${{ steps.globals.outputs.JOB_BRANCH }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          overwrite: true
+          sandbox: true
+
+      - uses: ./actions/docker2sandbox_singularity
+        id: docker2singularity
+        with:
+          dir: ${{vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/sandboxs/${{ steps.globals.outputs.JOB_BRANCH }}
+          name: ${{ steps.globals.outputs.JOB_BRANCH }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          overwrite: true

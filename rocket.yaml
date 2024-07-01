@@ -1,0 +1,9 @@
+host: ${REMOTE_HOST}
+user: ${REMOTE_USER}
+
+copy:
+  - from: src/*
+    to: ${JOB_PATH}
+    overwrite: true
+
+sbatch: -A ${REMOTE_GROUP} ${JOB_PATH}/launch.sh

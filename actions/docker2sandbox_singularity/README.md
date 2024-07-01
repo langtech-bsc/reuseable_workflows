@@ -27,11 +27,13 @@
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: check if job exists
-      id: job_exists
-      uses: langtech-bsc/magma/check-hpc-jobs@main
-      with:
-        job_name: ${{ steps.job_variables.outputs.job_name}}
-        remote_user: ${{ secrets.REMOTE_USER}}
-        remote_host: ${{ secrets.REMOTE_HOS`}}
+    - name: Docker to sandbox
+      id: docker2sandbox
+        with:
+          dir: ${{vars.GPFS_SINGULARITY_IMAGE_REGISTRY_PATH }}/sandboxs/${{ steps.globals.outputs.REPO_NAME }}
+          name: ${{ steps.globals.outputs.JOB_BRANCH }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          overwrite: true
+          sandbox: true
 ```
