@@ -71,7 +71,7 @@ jobs:
         id: yaml
         with:
           export-env-variables: false
-          file-path: './config.yaml'
+          file-path: './config.yml'
           fail-on-file-not-found: false
           separator: '_'
         continue-on-error: true
